@@ -1,10 +1,6 @@
 import BaseFactory from '../classes/BaseFactory';
 import BaseFixture from '../classes/BaseFixture';
-import {
-  FactoryConstructor,
-  FixtureConstructor,
-  FixtureResult,
-} from '../classes/types';
+import { FactoryConstructor, FixtureConstructor, FixtureResult } from '../classes/types';
 import { CLASS_IDENTIFIER } from '../decorators/constants';
 import { getFactoryIdentifier } from '../decorators/Factory';
 import { Type } from '../types';
@@ -26,13 +22,10 @@ export default class FixtureRoot {
     if (this.constructorCache) {
       return;
     }
-    this.constructorCache = await new Importer(
-      this.options.filePatterns
-    ).import();
+    this.constructorCache = await new Importer(this.options.filePatterns).import();
     for (const factoryConstructor of this.constructorCache.factories) {
       const name = Reflect.getMetadata(CLASS_IDENTIFIER, factoryConstructor);
-      this.factoryInstanceCache[name] =
-        this.instantiateFactory(factoryConstructor);
+      this.factoryInstanceCache[name] = this.instantiateFactory(factoryConstructor);
     }
   }
 

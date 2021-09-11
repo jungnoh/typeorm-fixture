@@ -76,9 +76,7 @@ function buildDependentMap(input: DependencySortInput[]): DependencyNode[] {
     .filter((item) => !item.check)
     .map((item) => item.key);
   if (unmatchedKeys.length > 0) {
-    throw new Error(
-      `Some keys are dependencies but not given: '${unmatchedKeys}'`
-    );
+    throw new Error(`Some keys are dependencies but not given: '${unmatchedKeys}'`);
   }
 
   return Object.values(ret).map((item) => {
@@ -88,8 +86,6 @@ function buildDependentMap(input: DependencySortInput[]): DependencyNode[] {
   });
 }
 
-export default function resolveLoadOrder(
-  input: DependencySortInput[]
-): string[] {
+export default function resolveLoadOrder(input: DependencySortInput[]): string[] {
   return sort(buildDependentMap(input));
 }

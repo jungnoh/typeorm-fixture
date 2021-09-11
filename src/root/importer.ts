@@ -22,9 +22,7 @@ export default class Importer {
 
   public async import(): Promise<ImportResult> {
     const files = await this.matchGlob();
-    const imported = await Promise.all(
-      files.map((file) => this.importFile(file))
-    );
+    const imported = await Promise.all(files.map((file) => this.importFile(file)));
     return {
       factories: imported.map((v) => v.factories).flat(),
       fixtures: imported.map((v) => v.fixtures).flat(),
@@ -41,14 +39,10 @@ export default class Importer {
       if (!(typeof exports[key] === 'function')) {
         continue;
       }
-      if (
-        Reflect.hasMetadata(FACTORY_MARK, (exports[key] as Function).prototype)
-      ) {
+      if (Reflect.hasMetadata(FACTORY_MARK, (exports[key] as Function).prototype)) {
         result.factories.push(exports[key] as FactoryConstructor);
       }
-      if (
-        Reflect.hasMetadata(FIXTURE_MARK, (exports[key] as Function).prototype)
-      ) {
+      if (Reflect.hasMetadata(FIXTURE_MARK, (exports[key] as Function).prototype)) {
         result.fixtures.push(exports[key] as FixtureConstructor);
       }
     }

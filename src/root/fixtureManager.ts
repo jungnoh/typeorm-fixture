@@ -2,19 +2,13 @@ import { Connection, getConnection, getManager } from 'typeorm';
 import { IsolationLevel } from 'typeorm/driver/types/IsolationLevel';
 import BaseFixture from '../classes/BaseFixture';
 import { FixtureConstructor } from '../classes/types';
-import {
-  CLASS_DEPENDENCIES,
-  CLASS_IDENTIFIER,
-  FIXTURE_TX_LEVEL,
-} from '../decorators/constants';
+import { CLASS_DEPENDENCIES, CLASS_IDENTIFIER, FIXTURE_TX_LEVEL } from '../decorators/constants';
 import resolveLoadOrder from './dependency';
 
 export default class FixtureManager {
   constructor(
     private readonly constructors: FixtureConstructor[],
-    private readonly instantiator: (
-      buildMe: FixtureConstructor
-    ) => BaseFixture<unknown>,
+    private readonly instantiator: (buildMe: FixtureConstructor) => BaseFixture<unknown>,
     private readonly onFixtureResult: (key: string, value: unknown) => void
   ) {}
 
@@ -35,10 +29,10 @@ export default class FixtureManager {
     fixture: FixtureConstructor,
     func: (connection: Connection) => Promise<T>
   ): Promise<T> {
-    const isolationLevel = Reflect.getMetadata(
-      FIXTURE_TX_LEVEL,
-      fixture.prototype
-    ) as IsolationLevel | 'default' | undefined;
+    const isolationLevel = Reflect.getMetadata(FIXTURE_TX_LEVEL, fixture.prototype) as
+      | IsolationLevel
+      | 'default'
+      | undefined;
     const needsTransaction = !!isolationLevel;
 
     // TODO: Allow custom connections
@@ -61,8 +55,7 @@ export default class FixtureManager {
 
   private buildDependencyInput() {
     return this.constructors.map((item) => {
-      const dependencies =
-        Reflect.getMetadata(CLASS_DEPENDENCIES, item.prototype) ?? [];
+      const dependencies = Reflect.getMetadata(CLASS_DEPENDENCIES, item.prototype) ?? [];
       const name = Reflect.getMetadata(CLASS_IDENTIFIER, item.prototype);
       return {
         dependencies: this.depListToString(dependencies),

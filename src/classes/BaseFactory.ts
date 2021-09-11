@@ -30,9 +30,7 @@ export default abstract class BaseFactory<T> {
     return result;
   }
 
-  protected factoryOf<EntityType>(
-    type: Type<EntityType>
-  ): BaseFactory<EntityType> {
+  protected factoryOf<EntityType>(type: Type<EntityType>): BaseFactory<EntityType> {
     const result = this.bridge.getFactoryInstance(type);
     if (!result) {
       throw new Error(`Cannot find factory of ${type.name}`);

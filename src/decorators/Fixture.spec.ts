@@ -39,42 +39,28 @@ class TxFixture extends BaseFixture<void> {
 
 describe('@Fixture', () => {
   it('marks class as factory', () => {
-    expect(
-      Reflect.hasMetadata(FIXTURE_MARK, TestFixture.prototype)
-    ).toBeTruthy();
-    expect(Reflect.getMetadata(FIXTURE_MARK, TestFixture.prototype)).toEqual(
-      MARK_VALUE
-    );
+    expect(Reflect.hasMetadata(FIXTURE_MARK, TestFixture.prototype)).toBeTruthy();
+    expect(Reflect.getMetadata(FIXTURE_MARK, TestFixture.prototype)).toEqual(MARK_VALUE);
   });
   it('sets class identifier as constructor name', () => {
-    expect(
-      Reflect.getMetadata(CLASS_IDENTIFIER, TestFixture.prototype)
-    ).toEqual(TestFixture.name);
+    expect(Reflect.getMetadata(CLASS_IDENTIFIER, TestFixture.prototype)).toEqual(TestFixture.name);
   });
   it('overrides class identifier if name given', () => {
-    expect(
-      Reflect.getMetadata(CLASS_IDENTIFIER, NamedFixture.prototype)
-    ).toEqual('NAMED_FIXTURE');
+    expect(Reflect.getMetadata(CLASS_IDENTIFIER, NamedFixture.prototype)).toEqual('NAMED_FIXTURE');
   });
   it('dependencies is empty array if not given', () => {
-    expect(
-      Reflect.getMetadata(CLASS_DEPENDENCIES, TestFixture.prototype)
-    ).toEqual([]);
+    expect(Reflect.getMetadata(CLASS_DEPENDENCIES, TestFixture.prototype)).toEqual([]);
   });
   it('dependencies set if given', () => {
-    expect(
-      Reflect.getMetadata(CLASS_DEPENDENCIES, DepTestFixture.prototype)
-    ).toEqual([TestFixture]);
+    expect(Reflect.getMetadata(CLASS_DEPENDENCIES, DepTestFixture.prototype)).toEqual([
+      TestFixture,
+    ]);
   });
   it('isolationLevel undefined if not set', () => {
-    expect(
-      Reflect.getMetadata(FIXTURE_TX_LEVEL, TestFixture.prototype)
-    ).toBeUndefined();
+    expect(Reflect.getMetadata(FIXTURE_TX_LEVEL, TestFixture.prototype)).toBeUndefined();
   });
   it('isolationLevel set', () => {
-    expect(Reflect.getMetadata(FIXTURE_TX_LEVEL, TxFixture.prototype)).toEqual(
-      'SERIALIZABLE'
-    );
+    expect(Reflect.getMetadata(FIXTURE_TX_LEVEL, TxFixture.prototype)).toEqual('SERIALIZABLE');
   });
   it('throws error if decorated twice', () => {
     const test = () => {

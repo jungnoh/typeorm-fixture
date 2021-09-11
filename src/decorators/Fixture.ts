@@ -8,7 +8,7 @@ import {
   MARK_VALUE,
 } from './constants';
 import { FixtureConstructor } from '../classes/types';
-import { BaseFixture } from '..';
+import BaseFixture from '../classes/BaseFixture';
 
 interface FixtureOptions {
   name?: string;
@@ -16,10 +16,10 @@ interface FixtureOptions {
   dependencies?: FixtureConstructor[];
 }
 
-export default function Fixture<
-  T extends { new (...args: any[]): BaseFixture<unknown> }
->(options?: FixtureOptions) {
-  return (target: T) => {
+export default function Fixture<T extends { new (...args: any[]): BaseFixture<unknown> }>(
+  options?: FixtureOptions
+) {
+  return (target: T): void => {
     const fixtureName = options?.name ?? target.name;
     const deps = options?.dependencies ?? [];
 
