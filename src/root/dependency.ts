@@ -50,12 +50,13 @@ function buildDependentMap(input: DependencySortInput[]): DependencyNode[] {
         throw new Error(`Duplicate key '${item.key}'`);
       }
       ret[item.key].check = true;
+    } else {
+      ret[item.key] = {
+        key: item.key,
+        dependents: [],
+        check: true,
+      };
     }
-    ret[item.key] = {
-      key: item.key,
-      dependents: [],
-      check: true,
-    };
     for (const parent of item.dependencies) {
       if (parent === item.key) {
         throw new Error(`'${item.key}' references itself`);
