@@ -6,7 +6,8 @@
   "author": "jungnoh",
   "license": "MIT",
   "scripts": {
-    "lint": "eslint --fix src"
+    "lint": "eslint --fix src",
+    "build": "tsc"
   },
   "dependencies": {
     "glob": "^7.1.7",
