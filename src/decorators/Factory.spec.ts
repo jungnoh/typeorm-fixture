@@ -19,7 +19,7 @@ class TestFactory extends BaseFactory<TargetEntity> {
 }
 
 @Factory(TargetEntity)
-class WronglyImplementedTestFactory {}
+class UnextendedTestFactory {}
 
 describe('@Factory', () => {
   it('marks class as factory', () => {
@@ -45,6 +45,6 @@ describe('@Factory', () => {
       getFactoryInstance: jest.fn(),
     };
     expect(() => new TestFactory(mockedBridge)).not.toThrow();
-    expect(() => new WronglyImplementedTestFactory()).toThrow();
+    expect(() => new UnextendedTestFactory()).toThrow();
   });
 });

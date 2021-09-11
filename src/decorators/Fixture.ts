@@ -8,6 +8,7 @@ import {
   MARK_VALUE,
 } from './constants';
 import { FixtureConstructor } from '../classes/types';
+import { BaseFixture } from '..';
 
 interface FixtureOptions {
   name?: string;
@@ -15,8 +16,10 @@ interface FixtureOptions {
   dependencies?: FixtureConstructor[];
 }
 
-export default function Fixture(options?: FixtureOptions) {
-  return (target: Function): void => {
+export default function Fixture<
+  T extends { new (...args: any[]): BaseFixture<unknown> }
+>(options?: FixtureOptions) {
+  return (target: T) => {
     const fixtureName = options?.name ?? target.name;
     const deps = options?.dependencies ?? [];
 
@@ -29,7 +32,7 @@ export default function Fixture(options?: FixtureOptions) {
     Reflect.defineMetadata(CLASS_DEPENDENCIES, deps, target.prototype);
     Reflect.defineMetadata(
       FIXTURE_TX_LEVEL,
-      options?.dependencies ?? undefined,
+      options?.isolationLevel ?? undefined,
       target.prototype
     );
   };
