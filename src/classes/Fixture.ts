@@ -9,7 +9,9 @@ export default abstract class BaseFixture<T = void> {
 
   public abstract install(connection: Connection): Promise<T>;
 
-  protected loadFixtureResult<FixtureType extends BaseFixture<unknown>>(type: Type<FixtureType>): UnPromisify<ReturnType<FixtureType['install']>> {
+  protected loadFixtureResult<FixtureType extends BaseFixture<unknown>>(
+    type: Type<FixtureType>
+  ): UnPromisify<ReturnType<FixtureType['install']>> {
     const result = this.bridge.getFixtureResult(type);
     if (!result) {
       throw new Error(`Cannot load result of fixture ${type.name}`);
@@ -17,7 +19,9 @@ export default abstract class BaseFixture<T = void> {
     return result;
   }
 
-  protected factoryOf<EntityType>(type: Type<EntityType>): BaseFactory<EntityType> {
+  protected factoryOf<EntityType>(
+    type: Type<EntityType>
+  ): BaseFactory<EntityType> {
     const result = this.bridge.getFactoryInstance(type);
     if (!result) {
       throw new Error(`Cannot find factory of ${type.name}`);

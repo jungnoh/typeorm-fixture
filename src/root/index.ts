@@ -1,9 +1,15 @@
+import { getConnection } from 'typeorm';
 import BaseFactory from '../classes/Factory';
 import BaseFixture from '../classes/Fixture';
-import { FactoryConstructor, FixtureConstructor, FixtureResult } from '../classes/types';
-import { CLASS_IDENTIFIER } from '../decorators/constants';
+import {
+  FactoryConstructor,
+  FixtureConstructor,
+  FixtureResult,
+} from '../classes/types';
+import { CLASS_DEPENDENCIES, CLASS_IDENTIFIER } from '../decorators/constants';
 import { getFactoryIdentifier } from '../decorators/Factory';
 import { Type } from '../types';
+import FixtureManager from './fixtureManager';
 import Importer, { ImportResult } from './importer';
 
 export interface FixtureRootOptions {
@@ -21,22 +27,43 @@ export default class FixtureRoot {
     if (this.constructorCache) {
       return;
     }
-    this.constructorCache = await new Importer(this.options.filePatterns).import();
+    this.constructorCache = await new Importer(
+      this.options.filePatterns
+    ).import();
     for (const factoryConstructor of this.constructorCache.factories) {
       const name = Reflect.getMetadata(CLASS_IDENTIFIER, factoryConstructor);
-      this.factoryInstanceCache[name] = this.instantiateFactory(factoryConstructor);
+      this.factoryInstanceCache[name] =
+        this.instantiateFactory(factoryConstructor);
     }
   }
 
-  public getFactoryInstance<EntityType>(type: Type<EntityType>): BaseFactory<EntityType> | undefined {
+  public async installFixtures(): Promise<void> {
+    if (!this.constructorCache) {
+      throw new Error('Fixture files have not been imported yet');
+    }
+    const manager = new FixtureManager(
+      this.constructorCache.fixtures,
+      (buildMe) => this.instantiateFixture(buildMe),
+      (key, value) => {
+        this.fixtureResultCache[key] = value;
+      }
+    );
+    await manager.loadAll();
+  }
+
+  public getFactoryInstance<EntityType>(
+    type: Type<EntityType>
+  ): BaseFactory<EntityType> | undefined {
     const key = getFactoryIdentifier(type.name);
     if (key in this.factoryInstanceCache) {
-      return (this.factoryInstanceCache[key] as BaseFactory<EntityType>);
+      return this.factoryInstanceCache[key] as BaseFactory<EntityType>;
     }
     return undefined;
   }
 
-  public getFixtureResult<T extends BaseFixture<unknown>>(type: Type<T>): FixtureResult<T> | undefined {
+  public getFixtureResult<T extends BaseFixture<unknown>>(
+    type: Type<T>
+  ): FixtureResult<T> | undefined {
     const key = Reflect.getMetadata(CLASS_IDENTIFIER, type.prototype);
     if (!key) {
       throw new Error(`'${type.name}' is not a valid fixture.`);

@@ -1,15 +1,18 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import { IsolationLevel } from 'typeorm/driver/types/IsolationLevel';
-import BaseFixture from '../classes/Fixture';
-import { CLASS_DEPENDENCIES, CLASS_IDENTIFIER, FIXTURE_MARK, FIXTURE_TX_LEVEL, MARK_VALUE } from './constants';
-import { Type } from '../types';
- 
-type FixtureNameType = Type<BaseFixture<unknown>>;
+import {
+  CLASS_DEPENDENCIES,
+  CLASS_IDENTIFIER,
+  FIXTURE_MARK,
+  FIXTURE_TX_LEVEL,
+  MARK_VALUE,
+} from './constants';
+import { FixtureConstructor } from '../classes/types';
 
 interface FixtureOptions {
   name?: string;
-  isolationLevel?: IsolationLevel;
-  dependencies?: FixtureNameType[];
+  isolationLevel?: IsolationLevel | 'default';
+  dependencies?: FixtureConstructor[];
 }
 
 export default function Fixture(options?: FixtureOptions) {
@@ -24,6 +27,10 @@ export default function Fixture(options?: FixtureOptions) {
 
     Reflect.defineMetadata(CLASS_IDENTIFIER, fixtureName, target.prototype);
     Reflect.defineMetadata(CLASS_DEPENDENCIES, deps, target.prototype);
-    Reflect.defineMetadata(FIXTURE_TX_LEVEL, options?.dependencies ?? null, target.prototype);
+    Reflect.defineMetadata(
+      FIXTURE_TX_LEVEL,
+      options?.dependencies ?? undefined,
+      target.prototype
+    );
   };
 }

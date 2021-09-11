@@ -8,15 +8,15 @@ export default abstract class BaseFactory<T> {
 
   public randomMany(count: number): T[] {
     const result: T[] = [];
-    for (let i=0; i<count; i++) {
+    for (let i = 0; i < count; i++) {
       result.push(this.random());
-    }    
+    }
     return result;
   }
 
   public partial(overwrite: PartialProperties<T>): T {
     const item = this.random();
-    for (const key of (Object.keys(overwrite) as (keyof T)[])) {
+    for (const key of Object.keys(overwrite) as (keyof T)[]) {
       item[key] = overwrite[key as keyof PartialProperties<T>] as T[typeof key];
     }
     return item;
@@ -24,13 +24,15 @@ export default abstract class BaseFactory<T> {
 
   public partialMany(count: number, overwrite: PartialProperties<T>): T[] {
     const result: T[] = [];
-    for (let i=0; i<count; i++) {
+    for (let i = 0; i < count; i++) {
       result.push(this.partial(overwrite));
     }
     return result;
   }
 
-  protected factoryOf<EntityType>(type: Type<EntityType>): BaseFactory<EntityType> {
+  protected factoryOf<EntityType>(
+    type: Type<EntityType>
+  ): BaseFactory<EntityType> {
     const result = this.bridge.getFactoryInstance(type);
     if (!result) {
       throw new Error(`Cannot find factory of ${type.name}`);
