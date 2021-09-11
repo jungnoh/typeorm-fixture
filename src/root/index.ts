@@ -24,7 +24,7 @@ export default class FixtureRoot {
     }
     this.constructorCache = await new Importer(this.options.filePatterns).import();
     for (const factoryConstructor of this.constructorCache.factories) {
-      const name = Reflect.getMetadata(CLASS_IDENTIFIER, factoryConstructor);
+      const name = Reflect.getMetadata(CLASS_IDENTIFIER, factoryConstructor.prototype);
       this.factoryInstanceCache[name] = this.instantiateFactory(factoryConstructor);
     }
   }
