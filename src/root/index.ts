@@ -1,12 +1,11 @@
-import { getConnection } from 'typeorm';
-import BaseFactory from '../classes/Factory';
-import BaseFixture from '../classes/Fixture';
+import BaseFactory from '../classes/BaseFactory';
+import BaseFixture from '../classes/BaseFixture';
 import {
   FactoryConstructor,
   FixtureConstructor,
   FixtureResult,
 } from '../classes/types';
-import { CLASS_DEPENDENCIES, CLASS_IDENTIFIER } from '../decorators/constants';
+import { CLASS_IDENTIFIER } from '../decorators/constants';
 import { getFactoryIdentifier } from '../decorators/Factory';
 import { Type } from '../types';
 import FixtureManager from './fixtureManager';

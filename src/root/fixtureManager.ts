@@ -1,6 +1,6 @@
 import { Connection, getConnection, getManager } from 'typeorm';
 import { IsolationLevel } from 'typeorm/driver/types/IsolationLevel';
-import BaseFixture from '../classes/Fixture';
+import BaseFixture from '../classes/BaseFixture';
 import { FixtureConstructor } from '../classes/types';
 import {
   CLASS_DEPENDENCIES,

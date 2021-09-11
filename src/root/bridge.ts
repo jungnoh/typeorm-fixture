@@ -1,5 +1,5 @@
-import BaseFactory from '../classes/Factory';
-import BaseFixture from '../classes/Fixture';
+import BaseFactory from '../classes/BaseFactory';
+import BaseFixture from '../classes/BaseFixture';
 import { FixtureResult } from '../classes/types';
 import { Type } from '../types';
 

@@ -38,7 +38,6 @@ function sort(input: DependencyNode[]): string[] {
       node(key);
     }
   }
-
   return result;
 }
 

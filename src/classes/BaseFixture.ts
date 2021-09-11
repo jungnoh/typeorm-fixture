@@ -2,7 +2,7 @@ import { Connection } from 'typeorm';
 import { CLASS_IDENTIFIER } from '../decorators/constants';
 import { FixtureBridge } from '../root/bridge';
 import { Type, UnPromisify } from '../types';
-import BaseFactory from './Factory';
+import BaseFactory from './BaseFactory';
 
 export default abstract class BaseFixture<T = void> {
   constructor(private readonly bridge: FixtureBridge) {}

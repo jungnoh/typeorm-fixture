@@ -1,7 +1,7 @@
 import { FactoryBridge, FixtureBridge } from '../root/bridge';
 import { UnPromisify } from '../types';
-import BaseFactory from './Factory';
-import BaseFixture from './Fixture';
+import BaseFactory from './BaseFactory';
+import BaseFixture from './BaseFixture';
 
 export type FixtureConstructor = new (
   bridge: FixtureBridge
