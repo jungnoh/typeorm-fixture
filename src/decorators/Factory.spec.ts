@@ -47,4 +47,17 @@ describe('@Factory', () => {
     expect(() => new TestFactory(mockedBridge)).not.toThrow();
     expect(() => new UnextendedTestFactory()).toThrow();
   });
+  it('throws error if decorated twice', () => {
+    const test = () => {
+      @Factory(TargetEntity)
+      @Factory(TargetEntity)
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      class DoubleTestFactory extends BaseFactory<TargetEntity> {
+        public random(): TargetEntity {
+          throw new Error('Method not implemented.');
+        }
+      }
+    };
+    expect(test).toThrowError();
+  });
 });

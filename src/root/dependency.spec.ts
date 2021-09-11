@@ -59,4 +59,13 @@ describe('dependency resolver', () => {
     }
     expect(result.sort()).toEqual(['1', '2', '3', '4', '5', '6', '7']);
   });
+
+  it('throws if duplicate key exists', () => {
+    const test = () =>
+      resolveLoadOrder([
+        { key: '1', dependencies: [] },
+        { key: '1', dependencies: [] },
+      ]);
+    expect(test).toThrowError();
+  });
 });

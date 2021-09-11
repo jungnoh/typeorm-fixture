@@ -16,6 +16,13 @@ class TestFixture extends BaseFixture<void> {
   }
 }
 
+@Fixture({ name: 'NAMED_FIXTURE' })
+class NamedFixture extends BaseFixture<void> {
+  public install(): Promise<void> {
+    throw new Error('Method not implemented.');
+  }
+}
+
 @Fixture({ dependencies: [TestFixture] })
 class DepTestFixture extends BaseFixture<void> {
   public install(): Promise<void> {
@@ -44,6 +51,11 @@ describe('@Fixture', () => {
       Reflect.getMetadata(CLASS_IDENTIFIER, TestFixture.prototype)
     ).toEqual(TestFixture.name);
   });
+  it('overrides class identifier if name given', () => {
+    expect(
+      Reflect.getMetadata(CLASS_IDENTIFIER, NamedFixture.prototype)
+    ).toEqual('NAMED_FIXTURE');
+  });
   it('dependencies is empty array if not given', () => {
     expect(
       Reflect.getMetadata(CLASS_DEPENDENCIES, TestFixture.prototype)
@@ -63,5 +75,18 @@ describe('@Fixture', () => {
     expect(Reflect.getMetadata(FIXTURE_TX_LEVEL, TxFixture.prototype)).toEqual(
       'SERIALIZABLE'
     );
+  });
+  it('throws error if decorated twice', () => {
+    const test = () => {
+      @Fixture()
+      @Fixture()
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      class DoubleTestFixture extends BaseFixture {
+        public install(): Promise<void> {
+          throw new Error('Method not implemented.');
+        }
+      }
+    };
+    expect(test).toThrowError();
   });
 });
