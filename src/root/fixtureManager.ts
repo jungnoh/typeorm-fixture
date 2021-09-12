@@ -1,4 +1,4 @@
-import { Connection, getConnection, getManager } from 'typeorm';
+import { EntityManager, getManager } from 'typeorm';
 import { IsolationLevel } from 'typeorm/driver/types/IsolationLevel';
 import BaseFixture from '../classes/BaseFixture';
 import { FixtureConstructor } from '../classes/types';
@@ -27,7 +27,7 @@ export default class FixtureManager {
 
   private async runWithScopedConnection<T>(
     fixture: FixtureConstructor,
-    func: (connection: Connection) => Promise<T>
+    func: (entityManager: EntityManager) => Promise<T>
   ): Promise<T> {
     const isolationLevel = Reflect.getMetadata(FIXTURE_TX_LEVEL, fixture.prototype) as
       | IsolationLevel
@@ -37,25 +37,25 @@ export default class FixtureManager {
 
     // TODO: Allow custom connections
     if (!needsTransaction) {
-      return await func(getConnection());
+      return await func(getManager());
     }
 
     let result: T;
     if (isolationLevel === 'default') {
       await getManager().transaction(async (entityManager) => {
-        result = await func(entityManager.connection);
+        result = await func(entityManager);
       });
       return result!;
     }
     await getManager().transaction(isolationLevel, async (entityManager) => {
-      result = await func(entityManager.connection);
+      result = await func(entityManager);
     });
     return result!;
   }
 
   private buildDependencyInput() {
     return this.constructors.map((item) => {
-      const dependencies = Reflect.getMetadata(CLASS_DEPENDENCIES, item.prototype) ?? [];
+      const dependencies = Reflect.getMetadata(CLASS_DEPENDENCIES, item.prototype);
       const name = Reflect.getMetadata(CLASS_IDENTIFIER, item.prototype);
       return {
         dependencies: this.depListToString(dependencies),

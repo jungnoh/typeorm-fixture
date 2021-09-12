@@ -9,7 +9,7 @@
     "lint": "eslint --fix src",
     "build": "tsc",
     "test": "jest",
-    "test:coverage": "jest --coverage --coverageDirectory='coverage'"
+    "test:coverage": "jest --coverage"
   },
   "dependencies": {
     "glob": "^7.1.7",

@@ -1,4 +1,4 @@
-import { Connection } from 'typeorm';
+import { EntityManager } from 'typeorm';
 import { CLASS_IDENTIFIER } from '../decorators/constants';
 import { FixtureBridge } from '../root/bridge';
 import { Type, UnPromisify } from '../types';
@@ -7,7 +7,7 @@ import BaseFactory from './BaseFactory';
 export default abstract class BaseFixture<T = void> {
   constructor(private readonly bridge: FixtureBridge) {}
 
-  public abstract install(connection: Connection): Promise<T>;
+  public abstract install(manager: EntityManager): Promise<T>;
 
   protected loadFixtureResult<FixtureType extends BaseFixture<unknown>>(
     type: Type<FixtureType>
