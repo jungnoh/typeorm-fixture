@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-types */
-export type Type<T> = new () => T;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type Type<T> = new (...args: any[]) => T;
 
 export type UnPromisify<T> = T extends Promise<infer U> ? U : T;
 

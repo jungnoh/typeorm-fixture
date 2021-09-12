@@ -86,9 +86,7 @@ describe('BaseFixture', () => {
     });
     it('fails if does not exist', () => {
       const fixture = new TestFixture(mockedBridge as unknown as FixtureBridge);
-      expect(() =>
-        fixture.testFactoryOf(TestFixture as new () => TestFixture)
-      ).toThrowError();
+      expect(() => fixture.testFactoryOf(TestFixture as new () => TestFixture)).toThrowError();
     });
   });
 });

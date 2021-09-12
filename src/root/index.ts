@@ -61,7 +61,7 @@ export default class FixtureRoot {
       throw new Error(`'${type.name}' is not a valid fixture.`);
     }
     if (key in this.fixtureResultCache) {
-      return key as FixtureResult<T>;
+      return this.fixtureResultCache[key] as FixtureResult<T>;
     }
     return undefined;
   }

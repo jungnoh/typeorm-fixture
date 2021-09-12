@@ -15,14 +15,14 @@ export default class FixtureManager {
   public async loadAll(): Promise<void> {
     const loadOrder = resolveLoadOrder(this.buildDependencyInput());
     const fixtureMap = this.buildFixtureMap();
-    loadOrder.forEach(async (key) => {
+    for (const key of loadOrder) {
       const instance = this.instantiator(fixtureMap[key]);
       const result = await this.runWithScopedConnection(
         fixtureMap[key],
         async (connection) => await instance.install(connection)
       );
       this.onFixtureResult(key, result);
-    });
+    }
   }
 
   private async runWithScopedConnection<T>(
