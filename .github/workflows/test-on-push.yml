@@ -24,8 +24,29 @@ jobs:
       run: yarn lint
     - name: Test
       run: yarn test:coverage
+      env:
+        POSTGRES_HOST: localhost
     - name: Coveralls
       uses: coverallsapp/github-action@master
       with:
-        path-to-lcov: './src/coverage/lcov.info'
+        path-to-lcov: './coverage/lcov.info'
         github-token: ${{ secrets.GITHUB_TOKEN }}
+    # Service containers to run with `container-job`
+    services:
+      # Label used to access the service container
+      db:
+        # Docker Hub image
+        image: postgres
+        # Provide the password for postgres
+        env:
+          POSTGRES_DB: test
+          POSTGRES_USER: foo
+          POSTGRES_PASSWORD: foo
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432

@@ -1,0 +1,15 @@
+version: "3"
+services:
+  app:
+    image: typeorm-fixture-test 
+    depends_on:
+      - db
+    volumes:
+      - ./coverage:/usr/src/app/coverage
+  db:
+    image: "postgres:13-alpine"
+    environment:
+      POSTGRES_DB: test
+      POSTGRES_USER: foo
+      POSTGRES_PASSWORD: foo
+    

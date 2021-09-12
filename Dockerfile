@@ -7,4 +7,4 @@ ADD package.json yarn.lock /usr/src/app/
 RUN yarn install --frozen-lockfile
 
 ADD . /usr/src/app/ 
-ENTRYPOINT [ "yarn", "test" ]
+ENTRYPOINT [ "yarn", "test:coverage" ]

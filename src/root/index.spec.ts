@@ -3,7 +3,7 @@ import { BaseFixture, Fixture } from '..';
 import BaseFactory from '../classes/BaseFactory';
 import Factory from '../decorators/Factory';
 import Importer from './importer';
-import { createConnection } from 'typeorm';
+import { createConnection, getConnection } from 'typeorm';
 import { Type } from '../types';
 
 class TargetEntity {
@@ -53,16 +53,21 @@ class TestingFixture extends BaseFixture<void> {
 
 describe('FixtureRoot', () => {
   beforeAll(async () => {
-    createConnection({
-      type: 'sqlite',
-      database: ':memory:',
+    await createConnection({
+      type: 'postgres',
+      host: process.env.POSTGRES_HOST ?? 'db',
+      database: 'test',
+      username: 'foo',
+      password: 'foo',
       dropSchema: true,
       entities: [],
       synchronize: true,
       logging: false,
     });
   });
-
+  afterAll(async () => {
+    await getConnection().close();
+  });
   describe('loadFiles', () => {
     it('loads', async () => {
       jest.spyOn(Importer.prototype, 'import').mockImplementation(async () => {
