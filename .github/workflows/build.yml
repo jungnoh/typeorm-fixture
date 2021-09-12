@@ -1,0 +1,24 @@
+name: Build 
+
+on:
+  push:
+    branches:
+    - 'main'
+
+# Will include pushing to npm once project is in a releasable state
+jobs:
+  Build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v2
+      with:
+        node-version: '16'
+        cache: 'yarn'
+    - name: Install yarn packages
+      run: yarn install
+    - name: Test
+      run: yarn test
+    - name: Build
+      run: yarn build
