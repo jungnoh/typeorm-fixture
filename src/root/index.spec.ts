@@ -149,6 +149,16 @@ describe('FixtureRoot', () => {
       ).rejects.toThrowError();
     });
   });
+  describe('clearFixtureResult', () => {
+    it('clears cache', async () => {
+      const instance = new FixtureRoot({ fixtures: [TestFixture] });
+      await instance.loadFiles();
+      await instance.installFixtures();
+      expect(instance.getFixtureResult(TestFixture)).not.toBeUndefined();
+      instance.clearFixtureResult();
+      expect(instance.getFixtureResult(TestFixture)).toBeUndefined();
+    });
+  });
   describe('getFactoryInstance', () => {
     it('returns undefined if not found', () => {
       const instance = new FixtureRoot({ filePatterns: [] });

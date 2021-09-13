@@ -51,6 +51,10 @@ export default class FixtureRoot {
     await manager.loadAll(options);
   }
 
+  public clearFixtureResult(): void {
+    this.fixtureResultCache = {};
+  }
+
   public getFactoryInstance<EntityType>(
     type: Type<EntityType>,
     name: string = DEFAULT_FACTORY_NAME
