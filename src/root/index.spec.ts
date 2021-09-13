@@ -104,6 +104,9 @@ describe('FixtureRoot', () => {
     });
   });
   describe('installFixtures', () => {
+    afterEach(() => {
+      jest.spyOn(Importer.prototype, 'import').mockRestore();
+    });
     it('throws if not loaded', async () => {
       const instance = new FixtureRoot({ filePatterns: [] });
       await expect(instance.installFixtures()).rejects.toThrowError();
@@ -123,7 +126,6 @@ describe('FixtureRoot', () => {
       expect(instance.getFixtureResult(TestFixture2)).toEqual('TestValue2');
     });
     it('loads manually given fixtures', async () => {
-      jest.spyOn(Importer.prototype, 'import').mockRestore();
       const instance = new FixtureRoot({
         factories: [TestFactory],
         fixtures: [TestFixture, TestFixture2],
@@ -135,6 +137,16 @@ describe('FixtureRoot', () => {
       expect(instance.getFactoryInstance(TargetEntity)).not.toBeUndefined();
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       instance.getFactoryInstance(TargetEntity)!.random();
+    });
+    it('can use filter', async () => {
+      const instance = new FixtureRoot({
+        factories: [],
+        fixtures: [TestFixture, TestFixture2],
+      });
+      await instance.loadFiles();
+      await expect(
+        instance.installFixtures({ only: [TestFixture2], propagateDependencies: false })
+      ).rejects.toThrowError();
     });
   });
   describe('getFactoryInstance', () => {

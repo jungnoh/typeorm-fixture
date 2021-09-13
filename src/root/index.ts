@@ -4,7 +4,7 @@ import { FactoryConstructor, FixtureConstructor, FixtureResult } from '../classe
 import { CLASS_IDENTIFIER, DEFAULT_FACTORY_NAME, FACTORY_NAME } from '../decorators/constants';
 import { getFactoryIdentifier } from '../decorators/Factory';
 import { Type } from '../types';
-import FixtureManager from './fixtureManager';
+import FixtureManager, { FixtureLoadFilters } from './fixtureManager';
 import Importer, { ImportResult } from './importer';
 
 export interface FixtureRootOptions {
@@ -37,7 +37,7 @@ export default class FixtureRoot {
     }
   }
 
-  public async installFixtures(): Promise<void> {
+  public async installFixtures(options?: FixtureLoadFilters): Promise<void> {
     if (!this.constructorCache) {
       throw new Error('Fixture files have not been imported yet');
     }
@@ -48,7 +48,7 @@ export default class FixtureRoot {
         this.fixtureResultCache[key] = value;
       }
     );
-    await manager.loadAll();
+    await manager.loadAll(options);
   }
 
   public getFactoryInstance<EntityType>(

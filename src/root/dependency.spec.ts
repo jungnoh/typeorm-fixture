@@ -52,7 +52,6 @@ describe('dependency resolver', () => {
       { key: '7', dependencies: ['6'] },
     ];
     const result = resolveLoadOrder(testCase);
-    console.log(result);
     for (const item of testCase) {
       for (const dep of item.dependencies) {
         expect(result.indexOf(item.key)).toBeGreaterThan(result.indexOf(dep));

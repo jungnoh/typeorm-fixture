@@ -5,6 +5,11 @@ import { FixtureConstructor } from '../classes/types';
 import { CLASS_DEPENDENCIES, CLASS_IDENTIFIER, FIXTURE_TX_LEVEL } from '../decorators/constants';
 import resolveLoadOrder from './dependency';
 
+export interface FixtureLoadFilters {
+  only?: FixtureConstructor[];
+  propagateDependencies?: boolean;
+}
+
 export default class FixtureManager {
   constructor(
     private readonly constructors: FixtureConstructor[],
@@ -12,8 +17,28 @@ export default class FixtureManager {
     private readonly onFixtureResult: (key: string, value: unknown) => void
   ) {}
 
-  public async loadAll(): Promise<void> {
-    const loadOrder = resolveLoadOrder(this.buildDependencyInput());
+  public async loadAll(options?: FixtureLoadFilters): Promise<void> {
+    let loadOrder: string[];
+
+    if (options?.only) {
+      const propagate = options?.propagateDependencies ?? true;
+      const onlyKeys = options.only.map((item) =>
+        Reflect.getMetadata(CLASS_IDENTIFIER, item.prototype)
+      );
+      if (propagate) {
+        loadOrder = resolveLoadOrder(this.buildDependencyInput(), {
+          traversalRoots: onlyKeys,
+        });
+      } else {
+        loadOrder = resolveLoadOrder(this.buildDependencyInput(), {
+          traversalRoots: onlyKeys,
+          traversalNodes: onlyKeys,
+        });
+      }
+    } else {
+      loadOrder = resolveLoadOrder(this.buildDependencyInput());
+    }
+
     const fixtureMap = this.buildFixtureMap();
     for (const key of loadOrder) {
       const instance = this.instantiator(fixtureMap[key]);
