@@ -12,26 +12,39 @@ interface DependencySortInput {
   dependencies: string[];
 }
 
-function sort(input: DependencyNode[]): string[] {
+interface DependencyConstraints {
+  traversalRoots?: string[];
+  traversalNodes?: string[];
+}
+
+function sort(input: DependencyNode[], constraints?: DependencyConstraints): string[] {
   const keyMap: Record<string, DependencySortNode> = input.reduce(
     (prev, now) => ({ ...prev, [now.key]: now }),
     {}
   );
   let result: string[] = [];
 
-  const node = (key: string) => {
+  const node = (key: string): boolean => {
+    let rootFound = !constraints?.traversalRoots || constraints.traversalRoots.includes(key);
+    if (constraints?.traversalNodes && constraints?.traversalNodes.includes(key)) {
+      throw new Error(`Node ${key} was not allowed but in the dependency tree.`);
+    }
     if (keyMap[key].check === 'done') {
-      return;
+      return rootFound;
     }
     if (keyMap[key].check === 'parent') {
       throw new Error(`Circular dependency from '${key}' detected!`);
     }
     keyMap[key].check = 'parent';
     for (const item of keyMap[key].dependents) {
-      node(item);
+      const childNodeFound = node(item);
+      rootFound = rootFound || childNodeFound;
     }
     keyMap[key].check = 'done';
-    result = [key, ...result];
+    if (rootFound) {
+      result = [key, ...result];
+    }
+    return rootFound;
   };
   for (const key of Object.keys(keyMap)) {
     if (!keyMap[key].check) {
@@ -86,6 +99,9 @@ function buildDependentMap(input: DependencySortInput[]): DependencyNode[] {
   });
 }
 
-export default function resolveLoadOrder(input: DependencySortInput[]): string[] {
-  return sort(buildDependentMap(input));
+export default function resolveLoadOrder(
+  input: DependencySortInput[],
+  constraints?: DependencyConstraints
+): string[] {
+  return sort(buildDependentMap(input), constraints);
 }

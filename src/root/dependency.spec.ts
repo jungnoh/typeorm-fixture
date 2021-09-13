@@ -52,6 +52,7 @@ describe('dependency resolver', () => {
       { key: '7', dependencies: ['6'] },
     ];
     const result = resolveLoadOrder(testCase);
+    console.log(result);
     for (const item of testCase) {
       for (const dep of item.dependencies) {
         expect(result.indexOf(item.key)).toBeGreaterThan(result.indexOf(dep));
@@ -67,5 +68,31 @@ describe('dependency resolver', () => {
         { key: '1', dependencies: [] },
       ]);
     expect(test).toThrowError();
+  });
+
+  it('checks traversalNodes constraint', () => {
+    const tree = [
+      { key: 'test1', dependencies: ['test2'] },
+      { key: 'test2', dependencies: ['test3'] },
+      { key: 'test3', dependencies: [] },
+    ];
+    const nodeTest = () =>
+      resolveLoadOrder(tree, {
+        traversalNodes: ['test1', 'test2'],
+      });
+    expect(nodeTest).toThrowError();
+
+    const fullNodeTest = () =>
+      resolveLoadOrder(tree, {
+        traversalNodes: ['test1', 'test2', 'test3'],
+      });
+    expect(fullNodeTest).toThrowError();
+
+    const rootTest = () =>
+      resolveLoadOrder(tree, {
+        traversalRoots: ['test2'],
+      });
+    expect(rootTest).not.toThrowError();
+    expect(rootTest()).toEqual(['test3', 'test2']);
   });
 });
