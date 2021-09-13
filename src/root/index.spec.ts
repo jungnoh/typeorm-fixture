@@ -113,6 +113,20 @@ describe('FixtureRoot', () => {
       expect(instance.getFixtureResult(TestFixture)).toEqual('TestValue1');
       expect(instance.getFixtureResult(TestFixture2)).toEqual('TestValue2');
     });
+    it('loads manually given fixtures', async () => {
+      jest.spyOn(Importer.prototype, 'import').mockRestore();
+      const instance = new FixtureRoot({
+        factories: [TestFactory],
+        fixtures: [TestFixture, TestFixture2],
+      });
+      await instance.loadFiles();
+      await instance.installFixtures();
+      expect(instance.getFixtureResult(TestFixture)).toEqual('TestValue1');
+      expect(instance.getFixtureResult(TestFixture2)).toEqual('TestValue2');
+      expect(instance.getFactoryInstance(TargetEntity)).not.toBeUndefined();
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      instance.getFactoryInstance(TargetEntity)!.random();
+    });
   });
   describe('getFactoryInstance', () => {
     it('returns undefined if not found', () => {

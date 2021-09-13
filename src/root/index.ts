@@ -8,7 +8,9 @@ import FixtureManager from './fixtureManager';
 import Importer, { ImportResult } from './importer';
 
 export interface FixtureRootOptions {
-  filePatterns: string[];
+  filePatterns?: string[];
+  factories?: FactoryConstructor[];
+  fixtures?: FixtureConstructor[];
 }
 
 export default class FixtureRoot {
@@ -22,7 +24,9 @@ export default class FixtureRoot {
     if (this.constructorCache) {
       return;
     }
-    this.constructorCache = await new Importer(this.options.filePatterns).import();
+    this.constructorCache = await new Importer(this.options.filePatterns ?? []).import();
+    this.constructorCache.factories.push(...(this.options.factories ?? []));
+    this.constructorCache.fixtures.push(...(this.options.fixtures ?? []));
     for (const factoryConstructor of this.constructorCache.factories) {
       const name = Reflect.getMetadata(CLASS_IDENTIFIER, factoryConstructor.prototype);
       this.factoryInstanceCache[name] = this.instantiateFactory(factoryConstructor);
