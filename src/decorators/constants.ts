@@ -7,3 +7,5 @@ export const CLASS_DEPENDENCIES = 'CLASS_DEPENDENCIES';
 export const FIXTURE_TX_LEVEL = 'ISOLATION_LEVEL';
 
 export const FACTORY_TARGET = 'FACTORY_TARGET';
+export const FACTORY_NAME = 'FACTORY_NAME';
+export const DEFAULT_FACTORY_NAME = 'default';

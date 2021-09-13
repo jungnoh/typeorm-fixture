@@ -1,7 +1,7 @@
 import BaseFactory from '../classes/BaseFactory';
 import BaseFixture from '../classes/BaseFixture';
 import { FactoryConstructor, FixtureConstructor, FixtureResult } from '../classes/types';
-import { CLASS_IDENTIFIER } from '../decorators/constants';
+import { CLASS_IDENTIFIER, DEFAULT_FACTORY_NAME, FACTORY_NAME } from '../decorators/constants';
 import { getFactoryIdentifier } from '../decorators/Factory';
 import { Type } from '../types';
 import FixtureManager from './fixtureManager';
@@ -17,7 +17,7 @@ export default class FixtureRoot {
   constructor(private readonly options: FixtureRootOptions) {}
 
   private constructorCache?: ImportResult;
-  private factoryInstanceCache: Record<string, BaseFactory<unknown>> = {};
+  private factoryInstanceCache: Record<string, Record<string, BaseFactory<unknown>>> = {};
   private fixtureResultCache: Record<string, unknown> = {};
 
   public async loadFiles(): Promise<void> {
@@ -28,8 +28,12 @@ export default class FixtureRoot {
     this.constructorCache.factories.push(...(this.options.factories ?? []));
     this.constructorCache.fixtures.push(...(this.options.fixtures ?? []));
     for (const factoryConstructor of this.constructorCache.factories) {
-      const name = Reflect.getMetadata(CLASS_IDENTIFIER, factoryConstructor.prototype);
-      this.factoryInstanceCache[name] = this.instantiateFactory(factoryConstructor);
+      const targetName = Reflect.getMetadata(CLASS_IDENTIFIER, factoryConstructor.prototype);
+      const name = Reflect.getMetadata(FACTORY_NAME, factoryConstructor.prototype);
+      if (!(targetName in this.factoryInstanceCache)) {
+        this.factoryInstanceCache[targetName] = {};
+      }
+      this.factoryInstanceCache[targetName][name] = this.instantiateFactory(factoryConstructor);
     }
   }
 
@@ -48,11 +52,12 @@ export default class FixtureRoot {
   }
 
   public getFactoryInstance<EntityType>(
-    type: Type<EntityType>
+    type: Type<EntityType>,
+    name: string = DEFAULT_FACTORY_NAME
   ): BaseFactory<EntityType> | undefined {
     const key = getFactoryIdentifier(type.name);
-    if (key in this.factoryInstanceCache) {
-      return this.factoryInstanceCache[key] as BaseFactory<EntityType>;
+    if (key in this.factoryInstanceCache && name in this.factoryInstanceCache[key]) {
+      return this.factoryInstanceCache[key][name] as BaseFactory<EntityType>;
     }
     return undefined;
   }

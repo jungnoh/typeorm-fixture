@@ -21,6 +21,15 @@ class TestFactory extends BaseFactory<TargetEntity> {
   }
 }
 
+@Factory(TargetEntity, { name: 'alternative' })
+class AlternativeFactory extends BaseFactory<TargetEntity> {
+  public random(): TargetEntity {
+    return {
+      value: 'AlternativeFactory',
+    };
+  }
+}
+
 @Factory(EmptyEntity)
 class TestingFactory extends BaseFactory<EmptyEntity> {
   public random(): EmptyEntity {
@@ -173,6 +182,17 @@ describe('FixtureRoot', () => {
       const factory = instance.getFactoryInstance(EmptyEntity);
       expect(factory).not.toBeUndefined();
       factory?.random();
+    });
+  });
+  describe('named factories', () => {
+    it('resolves named factories', async () => {
+      const instance = new FixtureRoot({ factories: [TestFactory, AlternativeFactory] });
+      await instance.loadFiles();
+      expect(instance.getFactoryInstance(TargetEntity)).toBeInstanceOf(TestFactory);
+      expect(instance.getFactoryInstance(TargetEntity, 'default')).toBeInstanceOf(TestFactory);
+      expect(instance.getFactoryInstance(TargetEntity, 'alternative')).toBeInstanceOf(
+        AlternativeFactory
+      );
     });
   });
 });

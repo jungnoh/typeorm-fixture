@@ -19,8 +19,8 @@ export default abstract class BaseFixture<T = void> {
     return result;
   }
 
-  protected factoryOf<EntityType>(type: Type<EntityType>): BaseFactory<EntityType> {
-    const result = this.bridge.getFactoryInstance(type);
+  protected factoryOf<EntityType>(type: Type<EntityType>, name?: string): BaseFactory<EntityType> {
+    const result = this.bridge.getFactoryInstance(type, name);
     if (!result) {
       throw new Error(`Cannot find factory of ${type.name}`);
     }
