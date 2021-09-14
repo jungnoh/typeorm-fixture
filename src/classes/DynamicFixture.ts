@@ -2,6 +2,7 @@ import { EntityManager } from 'typeorm';
 import { FixtureBridge } from '../root/bridge';
 import { Type, UnPromisify } from '../types';
 import BaseFactory from './BaseFactory';
+import DynamicFixtureDelegate from './DynamicFixtureDelegate';
 import BaseStaticFixture from './StaticFixture';
 
 export default abstract class BaseDynamicFixture<ResultType, ParameterType> {
@@ -23,6 +24,16 @@ export default abstract class BaseDynamicFixture<ResultType, ParameterType> {
     const result = this.bridge.getFactoryInstance(type, name);
     if (!result) {
       throw new Error(`Cannot find factory of ${type.name}`);
+    }
+    return result;
+  }
+
+  protected dynamicFixtureOf<T, U>(
+    type: Type<BaseDynamicFixture<T, U>>
+  ): DynamicFixtureDelegate<T, U> {
+    const result = this.bridge.dynamicFixtureOf(type);
+    if (!result) {
+      throw new Error(`Cannot find DynamicFixture of ${type.name}`);
     }
     return result;
   }
