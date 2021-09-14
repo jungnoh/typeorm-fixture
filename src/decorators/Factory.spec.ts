@@ -8,7 +8,7 @@ class TargetEntity {}
 
 @Factory(TargetEntity)
 class TestFactory extends BaseFactory<TargetEntity> {
-  public random(): TargetEntity {
+  protected createRandom(): TargetEntity {
     throw new Error('Method not implemented.');
   }
 }
@@ -42,7 +42,7 @@ describe('@Factory', () => {
       @Factory(TargetEntity)
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       class DoubleTestFactory extends BaseFactory<TargetEntity> {
-        public random(): TargetEntity {
+        protected createRandom(): TargetEntity {
           throw new Error('Method not implemented.');
         }
       }

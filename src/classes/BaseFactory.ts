@@ -1,10 +1,15 @@
+import { FACTORY_TARGET } from '../decorators/constants';
 import { FactoryBridge } from '../root/bridge';
-import { PartialProperties, Type } from '../types';
+import { PartialProperties, Properties, Type } from '../types';
 
 export default abstract class BaseFactory<T> {
   constructor(private readonly bridge: FactoryBridge) {}
 
-  public abstract random(): T;
+  protected abstract createRandom(overwrite: PartialProperties<T>): T | Properties<T>;
+
+  public random(): T {
+    return this.instanceEnsuredCreateRandom({});
+  }
 
   public randomMany(count: number): T[] {
     const result: T[] = [];
@@ -15,7 +20,7 @@ export default abstract class BaseFactory<T> {
   }
 
   public partial(overwrite: PartialProperties<T>): T {
-    const item = this.random();
+    const item = this.instanceEnsuredCreateRandom(overwrite);
     for (const key of Object.keys(overwrite) as (keyof T)[]) {
       item[key] = overwrite[key as keyof PartialProperties<T>] as T[typeof key];
     }
@@ -36,5 +41,26 @@ export default abstract class BaseFactory<T> {
       throw new Error(`Cannot find factory of ${type.name}`);
     }
     return result;
+  }
+
+  private instanceEnsuredCreateRandom(overwrite: PartialProperties<T>): T {
+    const entityType = this.getEntityType();
+    const result = this.createRandom(overwrite);
+    if (result instanceof entityType) {
+      return result as T;
+    }
+    const newInstance = new entityType();
+    return this.overwriteProperties(newInstance, result);
+  }
+
+  private overwriteProperties<U>(target: U, overwrite: PartialProperties<U>): U {
+    for (const key of Object.keys(overwrite) as (keyof U)[]) {
+      target[key] = overwrite[key as keyof PartialProperties<U>] as U[typeof key];
+    }
+    return target;
+  }
+
+  protected getEntityType(): Type<T> {
+    return Reflect.getMetadata(FACTORY_TARGET, this) as Type<T>;
   }
 }

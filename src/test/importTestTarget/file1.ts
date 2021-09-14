@@ -16,7 +16,7 @@ export class TestFixture extends BaseFixture<void> {
 
 @Factory(TargetEntity)
 export class TestFactory extends BaseFactory<TargetEntity> {
-  public random(): TargetEntity {
+  protected createRandom(): TargetEntity {
     throw new Error('Method not implemented.');
   }
 }

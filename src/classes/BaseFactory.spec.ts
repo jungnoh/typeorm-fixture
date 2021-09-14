@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import 'reflect-metadata';
 import { BaseFactory, Factory } from '..';
 import { FactoryBridge } from '../root/bridge';
@@ -13,14 +14,14 @@ class SmallEntity {
 
 @Factory(TargetEntity)
 class TestFactory extends BaseFactory<TargetEntity> {
-  public random(): TargetEntity {
+  protected createRandom(): TargetEntity {
     throw new Error('Method not implemented.');
   }
 }
 
 @Factory(TargetEntity)
 class TestFactoryOfFactory extends BaseFactory<TargetEntity> {
-  public random(): TargetEntity {
+  protected createRandom() {
     return {
       ...this.factoryOf(SmallEntity).random(),
       t2: 'success',
@@ -46,7 +47,7 @@ describe('BaseFactory', () => {
     };
     const factory = new TestFactory(mockedBridge);
     const randomMock = jest.fn(() => new TargetEntity());
-    jest.spyOn(factory, 'random').mockImplementation(randomMock);
+    jest.spyOn(factory, 'createRandom' as any).mockImplementation(randomMock);
     const result = factory.partial({ t2: 'asdf' });
     expect(result.t2).toEqual('asdf');
   });
@@ -56,7 +57,7 @@ describe('BaseFactory', () => {
     };
     const factory = new TestFactory(mockedBridge);
     const randomMock = jest.fn(() => new TargetEntity());
-    jest.spyOn(factory, 'random').mockImplementation(randomMock);
+    jest.spyOn(factory, 'createRandom' as any).mockImplementation(randomMock);
     const result = factory.partialMany(12, { t2: 'asdf' });
     expect(randomMock).toBeCalledTimes(12);
     expect(result).toHaveLength(12);

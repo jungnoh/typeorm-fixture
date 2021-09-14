@@ -14,7 +14,7 @@ class EmptyEntity {}
 
 @Factory(TargetEntity)
 class TestFactory extends BaseFactory<TargetEntity> {
-  public random(): TargetEntity {
+  protected createRandom(): TargetEntity {
     return {
       value: 'TestFactory',
     };
@@ -23,7 +23,7 @@ class TestFactory extends BaseFactory<TargetEntity> {
 
 @Factory(TargetEntity, { name: 'alternative' })
 class AlternativeFactory extends BaseFactory<TargetEntity> {
-  public random(): TargetEntity {
+  protected createRandom(): TargetEntity {
     return {
       value: 'AlternativeFactory',
     };
@@ -32,7 +32,7 @@ class AlternativeFactory extends BaseFactory<TargetEntity> {
 
 @Factory(EmptyEntity)
 class TestingFactory extends BaseFactory<EmptyEntity> {
-  public random(): EmptyEntity {
+  protected createRandom(): EmptyEntity {
     expect(this.factoryOf(TargetEntity).random()).toMatchObject({ value: 'TestFactory' });
     return {};
   }
