@@ -1,7 +1,8 @@
 import { createConnection, EntityManager, getConnection } from 'typeorm';
 import { FixtureRoot } from '..';
+import BaseDynamicFixture from '../classes/DynamicFixture';
 import BaseStaticFixture from '../classes/StaticFixture';
-import { StaticFixture } from '../decorators/Fixture';
+import { DynamicFixture, StaticFixture } from '../decorators/Fixture';
 import Importer from './importer';
 
 @StaticFixture()
@@ -35,6 +36,13 @@ class SerializableFixture extends BaseStaticFixture<void> {
     const result = await manager.query('SHOW TRANSACTION ISOLATION LEVEL');
     const level = result[0]['transaction_isolation'];
     expect(level).toEqual('serializable');
+  }
+}
+
+@DynamicFixture({ dependencies: [NoTransactionFixture, DependentFixture] })
+class DynamicFixtureTest extends BaseDynamicFixture<string, string> {
+  public async install(manager: EntityManager, options: string): Promise<string> {
+    return options;
   }
 }
 
@@ -92,6 +100,18 @@ describe('FixtureManager', () => {
       await instance.loadFiles();
       await instance.installFixtures({ only: [DependentFixture] });
       await expect(instance.installFixtures({ only: [DependentFixture] })).resolves.not.toThrow();
+    });
+  });
+
+  describe('install', () => {
+    it('DynamicFixtures are not installed', async () => {
+      const instance = new FixtureRoot({
+        fixtures: [NoTransactionFixture, DependentFixture, DynamicFixtureTest],
+      });
+      await instance.loadFiles();
+      const installMock = jest.fn();
+      jest.spyOn(DynamicFixtureTest.prototype, 'install').mockImplementation(installMock);
+      expect(installMock).not.toHaveBeenCalled();
     });
   });
 });

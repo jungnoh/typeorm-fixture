@@ -104,6 +104,7 @@ export default class FixtureRoot {
         instance as Exclude<BaseDynamicFixture<T, U>, BaseStaticFixture<T>>
       );
     }
+    return undefined;
   }
 
   private instantiateFactory(buildMe: FactoryConstructor) {

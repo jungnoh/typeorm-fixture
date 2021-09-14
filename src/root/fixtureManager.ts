@@ -32,7 +32,7 @@ export default class FixtureManager {
     let loadOrder: string[];
 
     if (options?.only) {
-      const propagate = options?.propagateDependencies ?? true;
+      const propagate = options.propagateDependencies ?? true;
       const onlyKeys = options.only.map((item) => getIdentifier(item));
       if (propagate) {
         loadOrder = resolveLoadOrder(this.buildDependencyInput(), {

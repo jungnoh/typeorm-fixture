@@ -2,10 +2,12 @@ import FixtureRoot from '.';
 import BaseFactory from '../classes/BaseFactory';
 import Factory from '../decorators/Factory';
 import Importer from './importer';
-import { createConnection, getConnection } from 'typeorm';
+import { createConnection, EntityManager, getConnection } from 'typeorm';
 import { Type } from '../types';
 import BaseStaticFixture from '../classes/StaticFixture';
-import { StaticFixture } from '../decorators/Fixture';
+import { DynamicFixture, StaticFixture } from '../decorators/Fixture';
+import BaseDynamicFixture from '../classes/DynamicFixture';
+import DynamicFixtureDelegate from '../classes/DynamicFixtureDelegate';
 
 class TargetEntity {
   public value!: string;
@@ -58,6 +60,15 @@ class TestingFixture extends BaseStaticFixture<void> {
   public async install(): Promise<void> {
     expect(this.fixtureResultOf(TestFixture)).toEqual('TestValue1');
     expect(this.factoryOf(TargetEntity).random()).toMatchObject({ value: 'TestFactory' });
+    await expect(this.dynamicFixtureOf(TestDynamicFixture).install('hi')).resolves.toEqual('hihi');
+    expect(() => this.dynamicFixtureOf(TestFixture)).toThrowError();
+  }
+}
+
+@DynamicFixture({ dependencies: [TestFixture] })
+class TestDynamicFixture extends BaseDynamicFixture<string, string> {
+  public async install(manager: EntityManager, options: string): Promise<string> {
+    return options + options;
   }
 }
 
@@ -119,7 +130,7 @@ describe('FixtureRoot', () => {
         return {
           factories: [],
           staticFixtures: [TestFixture, TestFixture2],
-          dynamicFixtures: [],
+          dynamicFixtures: [TestDynamicFixture],
         };
       });
       jest.spyOn(Importer.prototype, 'import').mockImplementation(importMock);
@@ -128,6 +139,7 @@ describe('FixtureRoot', () => {
       await instance.installFixtures();
       expect(instance.fixtureResultOf(TestFixture)).toEqual('TestValue1');
       expect(instance.fixtureResultOf(TestFixture2)).toEqual('TestValue2');
+      expect(instance.dynamicFixtureOf(TestDynamicFixture)).toBeInstanceOf(DynamicFixtureDelegate);
     });
     it('loads manually given fixtures', async () => {
       const instance = new FixtureRoot({
@@ -187,7 +199,7 @@ describe('FixtureRoot', () => {
       const importMock = jest.fn(async () => {
         return {
           factories: [TestFactory],
-          dynamicFixtures: [],
+          dynamicFixtures: [TestDynamicFixture],
           staticFixtures: [TestFixture, TestFixture2, TestingFixture],
         };
       });
