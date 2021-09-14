@@ -15,8 +15,8 @@ typeorm-fixture provides an easy and consistant way to load test fixtures into a
 
 This library provides three constructs:
 - **Factories** creates entities with random or partially prepared data.
-- **Static fixtures** load entites and data with fixed data when a test suite starts.
-- **Dynamic fixtures** load entiies and data during a test suite, and can be parameterized to fit your needs.
+- **Static fixtures** load entities and data with fixed data when a test suite starts.
+- **Dynamic fixtures** load entities and data during a test suite, and can be parameterized to fit your needs.
 
 Along with these, typeorm-fixture has many features that help us spend more time on writing actual tests.
 
@@ -184,8 +184,6 @@ export default class ArticleLikeFixture extends BaseDynamicFixture<ArticleLike, 
   }
 }
 ```
-Now we can 
-
 Some things to keep in mind are:
 - Dynamic fixtures and static fixtures are both fixtures. They can both be dependent on each other, and obtain instances/results of each other.
 - If the `isolationLevel` field is provided, the whole fixture is run within a single transaction. `isolationLevel` can be one of the values in TypeORM's `IsolationLevel` type, or `default` (using the default database isolation level). This can also used in static fixtures.
