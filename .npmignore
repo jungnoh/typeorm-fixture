@@ -1,0 +1,14 @@
+src
+coverage
+*.yml
+.github
+.vscode
+.prettierrc
+*.log
+*.tgz
+*.config.js
+.eslintrc.js
+.dockerignore
+.eslintrc.jsDockerfile
+Makefile
+Dockerfile

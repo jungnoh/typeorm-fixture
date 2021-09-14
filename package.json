@@ -3,12 +3,12 @@
   "version": "0.2.0",
   "description": "Painless TypeORM fixtures",
   "keywords": ["typeorm", "fixture", "test", "testing", "database"],
-  "main": "dist/src/index.ts",
+  "main": "dist/index.ts",
   "author": "jungnoh",
   "license": "MIT",
   "scripts": {
     "lint": "eslint --fix src",
-    "build": "tsc",
+    "build": "rm -rf dist && tsc",
     "test": "jest",
     "test:coverage": "jest --coverage"
   },
