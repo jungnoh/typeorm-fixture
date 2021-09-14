@@ -1,5 +1,5 @@
 import BaseFactory from '../classes/BaseFactory';
-import BaseFixture from '../classes/BaseFixture';
+import StaticFixture from '../classes/StaticFixture';
 import { FixtureResult } from '../classes/types';
 import { Type } from '../types';
 
@@ -8,7 +8,7 @@ export interface FixtureBridge {
     type: Type<EntityType>,
     name?: string
   ): BaseFactory<EntityType> | undefined;
-  fixtureResultOf<FixtureType extends BaseFixture<unknown>>(
+  fixtureResultOf<FixtureType extends StaticFixture<unknown>>(
     type: Type<FixtureType>
   ): FixtureResult<FixtureType> | undefined;
 }

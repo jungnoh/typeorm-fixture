@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import BaseFixture from '../classes/BaseFixture';
+import StaticFixture from '../classes/StaticFixture';
 import {
   CLASS_DEPENDENCIES,
   CLASS_IDENTIFIER,
@@ -10,21 +10,21 @@ import {
 import Fixture from './Fixture';
 
 @Fixture()
-class TestFixture extends BaseFixture<void> {
+class TestFixture extends StaticFixture<void> {
   public install(): Promise<void> {
     throw new Error('Method not implemented.');
   }
 }
 
 @Fixture({ dependencies: [TestFixture] })
-class DepTestFixture extends BaseFixture<void> {
+class DepTestFixture extends StaticFixture<void> {
   public install(): Promise<void> {
     throw new Error('Method not implemented.');
   }
 }
 
 @Fixture({ isolationLevel: 'SERIALIZABLE' })
-class TxFixture extends BaseFixture<void> {
+class TxFixture extends StaticFixture<void> {
   public install(): Promise<void> {
     throw new Error('Method not implemented.');
   }
@@ -59,7 +59,7 @@ describe('@Fixture', () => {
       @Fixture()
       @Fixture()
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      class DoubleTestFixture extends BaseFixture {
+      class DoubleTestFixture extends StaticFixture<void> {
         public install(): Promise<void> {
           throw new Error('Method not implemented.');
         }

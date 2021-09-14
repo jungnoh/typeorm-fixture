@@ -1,4 +1,5 @@
-import { BaseFactory, BaseFixture } from '../..';
+import { BaseFactory } from '../..';
+import StaticFixture from '../../classes/StaticFixture';
 import Factory from '../../decorators/Factory';
 import Fixture from '../../decorators/Fixture';
 
@@ -8,7 +9,7 @@ export const SOME_OTHER_LITERAL = 'hi2';
 export class TargetEntity {}
 
 @Fixture()
-export class TestFixture extends BaseFixture<void> {
+export class TestFixture extends StaticFixture<void> {
   public install(): Promise<void> {
     throw new Error('Method not implemented.');
   }

@@ -1,24 +1,25 @@
 import { createConnection, EntityManager, getConnection } from 'typeorm';
-import { BaseFixture, FixtureRoot } from '..';
+import { FixtureRoot } from '..';
+import StaticFixture from '../classes/StaticFixture';
 import Fixture from '../decorators/Fixture';
 import Importer from './importer';
 
 @Fixture()
-class NoTransactionFixture extends BaseFixture<number> {
+class NoTransactionFixture extends StaticFixture<number> {
   public async install() {
     return 1;
   }
 }
 
 @Fixture({ dependencies: [NoTransactionFixture] })
-class DependentFixture extends BaseFixture<number> {
+class DependentFixture extends StaticFixture<number> {
   public async install() {
     return 2;
   }
 }
 
 @Fixture({ isolationLevel: 'default' })
-class TransactionFixture extends BaseFixture<void> {
+class TransactionFixture extends StaticFixture<void> {
   public async install(manager: EntityManager) {
     expect(manager.connection.isConnected).toEqual(true);
     const result = await manager.query('SHOW TRANSACTION ISOLATION LEVEL');
@@ -28,7 +29,7 @@ class TransactionFixture extends BaseFixture<void> {
 }
 
 @Fixture({ isolationLevel: 'SERIALIZABLE' })
-class SerializableFixture extends BaseFixture<void> {
+class SerializableFixture extends StaticFixture<void> {
   public async install(manager: EntityManager) {
     expect(manager.connection.isConnected).toEqual(true);
     const result = await manager.query('SHOW TRANSACTION ISOLATION LEVEL');

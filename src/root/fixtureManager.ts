@@ -1,8 +1,8 @@
 import { EntityManager, getManager } from 'typeorm';
 import { IsolationLevel } from 'typeorm/driver/types/IsolationLevel';
-import BaseFixture from '../classes/BaseFixture';
+import StaticFixture from '../classes/StaticFixture';
 import { FixtureConstructor } from '../classes/types';
-import { CLASS_DEPENDENCIES, CLASS_IDENTIFIER, FIXTURE_TX_LEVEL } from '../decorators/constants';
+import { CLASS_DEPENDENCIES, FIXTURE_TX_LEVEL } from '../decorators/constants';
 import { getIdentifier } from '../decorators/identifiers';
 import resolveLoadOrder from './dependency';
 
@@ -14,7 +14,7 @@ export interface FixtureLoadFilters {
 export default class FixtureManager {
   constructor(
     private readonly constructors: FixtureConstructor[],
-    private readonly instantiator: (buildMe: FixtureConstructor) => BaseFixture<unknown>,
+    private readonly instantiator: (buildMe: FixtureConstructor) => StaticFixture<unknown>,
     private readonly onFixtureResult: (key: string, value: unknown) => void
   ) {}
 
@@ -43,7 +43,7 @@ export default class FixtureManager {
       const instance = this.instantiator(fixtureMap[key]);
       const result = await this.runWithScopedConnection(
         fixtureMap[key],
-        async (connection) => await instance.install(connection)
+        async (connection) => await instance.install(connection, undefined)
       );
       this.onFixtureResult(key, result);
     }

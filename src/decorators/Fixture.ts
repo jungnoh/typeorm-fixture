@@ -6,13 +6,13 @@ import {
   FIXTURE_TX_LEVEL,
   MARK_VALUE,
 } from './constants';
-import BaseFixture from '../classes/BaseFixture';
+import DynamicFixture from '../classes/DynamicFixture';
 import { FixtureOptions } from './types';
 import { createFixtureIdentifier, FixtureType } from './identifiers';
 
-export default function Fixture<T extends { new (...args: any[]): BaseFixture<unknown> }>(
-  options?: FixtureOptions
-) {
+export default function Fixture<
+  T extends { new (...args: any[]): DynamicFixture<unknown, unknown> }
+>(options?: FixtureOptions) {
   return (target: T): void => {
     const deps = options?.dependencies ?? [];
 

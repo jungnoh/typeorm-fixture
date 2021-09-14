@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 
-export { default as BaseFixture } from './classes/BaseFixture';
+export { default as BaseFixture } from './classes/DynamicFixture';
 export { default as BaseFactory } from './classes/BaseFactory';
 export { default as Factory } from './decorators/Factory';
 export { default as Fixture } from './decorators/Fixture';

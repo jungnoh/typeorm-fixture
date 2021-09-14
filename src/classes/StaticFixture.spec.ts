@@ -4,26 +4,26 @@ import Fixture from '../decorators/Fixture';
 import { FixtureBridge } from '../root/bridge';
 import { Type, UnPromisify } from '../types';
 import BaseFactory from './BaseFactory';
-import BaseFixture from './BaseFixture';
+import StaticFixture from './StaticFixture';
 
 class TestEntity {
   v!: string;
 }
 
 @Fixture()
-class TestTargetFixture extends BaseFixture<string> {
+class TestTargetFixture extends StaticFixture<string> {
   public async install(manager: EntityManager): Promise<string> {
     return 'asdf';
   }
 }
 
 @Fixture()
-class TestFixture extends BaseFixture<void> {
+class TestFixture extends StaticFixture<void> {
   public install(manager: EntityManager): Promise<void> {
     throw new Error('Method not implemented.');
   }
 
-  public testFixtureResultOf<FixtureType extends BaseFixture<unknown>>(
+  public testFixtureResultOf<FixtureType extends StaticFixture<unknown>>(
     type: Type<FixtureType>
   ): UnPromisify<ReturnType<FixtureType['install']>> {
     return this.fixtureResultOf(type);
@@ -34,11 +34,11 @@ class TestFixture extends BaseFixture<void> {
   }
 }
 
-describe('BaseFixture', () => {
+describe('StaticFixture', () => {
   describe('fixtureResultOf', () => {
     const mockedBridge = {
       getFactoryInstance: jest.fn(),
-      fixtureResultOf: jest.fn((type: Type<BaseFixture<unknown>>) => {
+      fixtureResultOf: jest.fn((type: Type<StaticFixture<unknown>>) => {
         if (type.name === TestTargetFixture.name) return 'asdf';
         return undefined;
       }),

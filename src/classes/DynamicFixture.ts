@@ -2,13 +2,14 @@ import { EntityManager } from 'typeorm';
 import { FixtureBridge } from '../root/bridge';
 import { Type, UnPromisify } from '../types';
 import BaseFactory from './BaseFactory';
+import StaticFixture from './StaticFixture';
 
-export default abstract class BaseFixture<T = void> {
+export default abstract class DynamicFixture<ResultType, ParameterType> {
   constructor(private readonly bridge: FixtureBridge) {}
 
-  public abstract install(manager: EntityManager): Promise<T>;
+  public abstract install(manager: EntityManager, options: ParameterType): Promise<ResultType>;
 
-  protected fixtureResultOf<FixtureType extends BaseFixture<unknown>>(
+  protected fixtureResultOf<FixtureType extends StaticFixture<unknown>>(
     type: Type<FixtureType>
   ): UnPromisify<ReturnType<FixtureType['install']>> {
     const result = this.bridge.fixtureResultOf(type);
