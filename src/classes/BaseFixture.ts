@@ -1,5 +1,4 @@
 import { EntityManager } from 'typeorm';
-import { CLASS_IDENTIFIER } from '../decorators/constants';
 import { FixtureBridge } from '../root/bridge';
 import { Type, UnPromisify } from '../types';
 import BaseFactory from './BaseFactory';
@@ -25,9 +24,5 @@ export default abstract class BaseFixture<T = void> {
       throw new Error(`Cannot find factory of ${type.name}`);
     }
     return result;
-  }
-
-  protected getFixtureName(): string {
-    return Reflect.getMetadata(CLASS_IDENTIFIER, this);
   }
 }

@@ -3,6 +3,7 @@ import { IsolationLevel } from 'typeorm/driver/types/IsolationLevel';
 import BaseFixture from '../classes/BaseFixture';
 import { FixtureConstructor } from '../classes/types';
 import { CLASS_DEPENDENCIES, CLASS_IDENTIFIER, FIXTURE_TX_LEVEL } from '../decorators/constants';
+import { getIdentifier } from '../decorators/identifiers';
 import resolveLoadOrder from './dependency';
 
 export interface FixtureLoadFilters {
@@ -22,9 +23,7 @@ export default class FixtureManager {
 
     if (options?.only) {
       const propagate = options?.propagateDependencies ?? true;
-      const onlyKeys = options.only.map((item) =>
-        Reflect.getMetadata(CLASS_IDENTIFIER, item.prototype)
-      );
+      const onlyKeys = options.only.map((item) => getIdentifier(item));
       if (propagate) {
         loadOrder = resolveLoadOrder(this.buildDependencyInput(), {
           traversalRoots: onlyKeys,
@@ -81,22 +80,20 @@ export default class FixtureManager {
   private buildDependencyInput() {
     return this.constructors.map((item) => {
       const dependencies = Reflect.getMetadata(CLASS_DEPENDENCIES, item.prototype);
-      const name = Reflect.getMetadata(CLASS_IDENTIFIER, item.prototype);
       return {
         dependencies: this.depListToString(dependencies),
-        key: name,
+        key: getIdentifier(item),
       };
     });
   }
 
   private buildFixtureMap(): Record<string, FixtureConstructor> {
     return this.constructors.reduce((prev, now) => {
-      const name = Reflect.getMetadata(CLASS_IDENTIFIER, now.prototype);
-      return { ...prev, [name]: now };
+      return { ...prev, [getIdentifier(now)]: now };
     }, {});
   }
 
   private depListToString(list: FixtureConstructor[]) {
-    return list.map((v) => Reflect.getMetadata(CLASS_IDENTIFIER, v.prototype));
+    return list.map((item) => getIdentifier(item));
   }
 }

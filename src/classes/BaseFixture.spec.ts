@@ -32,21 +32,9 @@ class TestFixture extends BaseFixture<void> {
   public testFactoryOf<EntityType>(type: Type<EntityType>): BaseFactory<EntityType> {
     return this.factoryOf(type);
   }
-
-  public testGetFixtureName(): string {
-    return this.getFixtureName();
-  }
 }
 
 describe('BaseFixture', () => {
-  it('getFixtureName', () => {
-    const mockedBridge = {
-      getFactoryInstance: jest.fn(),
-      fixtureResultOf: jest.fn(),
-    };
-    const fixture = new TestFixture(mockedBridge);
-    expect(fixture.testGetFixtureName()).toEqual(TestFixture.name);
-  });
   describe('fixtureResultOf', () => {
     const mockedBridge = {
       getFactoryInstance: jest.fn(),

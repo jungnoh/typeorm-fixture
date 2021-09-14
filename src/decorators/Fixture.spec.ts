@@ -16,13 +16,6 @@ class TestFixture extends BaseFixture<void> {
   }
 }
 
-@Fixture({ name: 'NAMED_FIXTURE' })
-class NamedFixture extends BaseFixture<void> {
-  public install(): Promise<void> {
-    throw new Error('Method not implemented.');
-  }
-}
-
 @Fixture({ dependencies: [TestFixture] })
 class DepTestFixture extends BaseFixture<void> {
   public install(): Promise<void> {
@@ -43,10 +36,9 @@ describe('@Fixture', () => {
     expect(Reflect.getMetadata(FIXTURE_MARK, TestFixture.prototype)).toEqual(MARK_VALUE);
   });
   it('sets class identifier as constructor name', () => {
-    expect(Reflect.getMetadata(CLASS_IDENTIFIER, TestFixture.prototype)).toEqual(TestFixture.name);
-  });
-  it('overrides class identifier if name given', () => {
-    expect(Reflect.getMetadata(CLASS_IDENTIFIER, NamedFixture.prototype)).toEqual('NAMED_FIXTURE');
+    expect(Reflect.getMetadata(CLASS_IDENTIFIER, TestFixture.prototype)).toEqual(
+      `FIXTURE_STATIC_${TestFixture.name}`
+    );
   });
   it('dependencies is empty array if not given', () => {
     expect(Reflect.getMetadata(CLASS_DEPENDENCIES, TestFixture.prototype)).toEqual([]);

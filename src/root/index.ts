@@ -1,8 +1,7 @@
 import BaseFactory from '../classes/BaseFactory';
 import BaseFixture from '../classes/BaseFixture';
 import { FactoryConstructor, FixtureConstructor, FixtureResult } from '../classes/types';
-import { CLASS_IDENTIFIER, DEFAULT_FACTORY_NAME, FACTORY_NAME } from '../decorators/constants';
-import { getFactoryIdentifier } from '../decorators/Factory';
+import { createFactoryIdentifier, getIdentifier } from '../decorators/identifiers';
 import { Type } from '../types';
 import FixtureManager, { FixtureLoadFilters } from './fixtureManager';
 import Importer, { ImportResult } from './importer';
@@ -17,7 +16,7 @@ export default class FixtureRoot {
   constructor(private readonly options: FixtureRootOptions) {}
 
   private constructorCache?: ImportResult;
-  private factoryInstanceCache: Record<string, Record<string, BaseFactory<unknown>>> = {};
+  private factoryInstanceCache: Record<string, BaseFactory<unknown>> = {};
   private fixtureResultCache: Record<string, unknown> = {};
 
   public async loadFiles(): Promise<void> {
@@ -28,12 +27,8 @@ export default class FixtureRoot {
     this.constructorCache.factories.push(...(this.options.factories ?? []));
     this.constructorCache.fixtures.push(...(this.options.fixtures ?? []));
     for (const factoryConstructor of this.constructorCache.factories) {
-      const targetName = Reflect.getMetadata(CLASS_IDENTIFIER, factoryConstructor.prototype);
-      const name = Reflect.getMetadata(FACTORY_NAME, factoryConstructor.prototype);
-      if (!(targetName in this.factoryInstanceCache)) {
-        this.factoryInstanceCache[targetName] = {};
-      }
-      this.factoryInstanceCache[targetName][name] = this.instantiateFactory(factoryConstructor);
+      const targetName = getIdentifier(factoryConstructor);
+      this.factoryInstanceCache[targetName] = this.instantiateFactory(factoryConstructor);
     }
   }
 
@@ -57,11 +52,11 @@ export default class FixtureRoot {
 
   public factoryOf<EntityType>(
     type: Type<EntityType>,
-    name: string = DEFAULT_FACTORY_NAME
+    name?: string
   ): BaseFactory<EntityType> | undefined {
-    const key = getFactoryIdentifier(type.name);
-    if (key in this.factoryInstanceCache && name in this.factoryInstanceCache[key]) {
-      return this.factoryInstanceCache[key][name] as BaseFactory<EntityType>;
+    const key = createFactoryIdentifier(type, name);
+    if (key in this.factoryInstanceCache) {
+      return this.factoryInstanceCache[key] as BaseFactory<EntityType>;
     }
     return undefined;
   }
@@ -69,10 +64,7 @@ export default class FixtureRoot {
   public fixtureResultOf<T extends BaseFixture<unknown>>(
     type: Type<T>
   ): FixtureResult<T> | undefined {
-    const key = Reflect.getMetadata(CLASS_IDENTIFIER, type.prototype);
-    if (!key) {
-      throw new Error(`'${type.name}' is not a valid fixture.`);
-    }
+    const key = getIdentifier(type);
     if (key in this.fixtureResultCache) {
       return this.fixtureResultCache[key] as FixtureResult<T>;
     }
