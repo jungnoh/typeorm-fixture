@@ -1,10 +1,13 @@
-import FixtureRoot from '.';
-import { BaseFixture, Fixture } from '..';
+import FixtureContainer from '.';
 import BaseFactory from '../classes/BaseFactory';
 import Factory from '../decorators/Factory';
 import Importer from './importer';
-import { createConnection, getConnection } from 'typeorm';
+import { createConnection, EntityManager, getConnection } from 'typeorm';
 import { Type } from '../types';
+import BaseStaticFixture from '../classes/StaticFixture';
+import { DynamicFixture, StaticFixture } from '../decorators/Fixture';
+import BaseDynamicFixture from '../classes/DynamicFixture';
+import DynamicFixtureDelegate from '../classes/DynamicFixtureDelegate';
 
 class TargetEntity {
   public value!: string;
@@ -38,29 +41,41 @@ class TestingFactory extends BaseFactory<EmptyEntity> {
   }
 }
 
-@Fixture()
-class TestFixture extends BaseFixture<string> {
+@StaticFixture()
+class TestFixture extends BaseStaticFixture<string> {
   public async install(): Promise<string> {
     return 'TestValue1';
   }
 }
 
-@Fixture({ dependencies: [TestFixture] })
-class TestFixture2 extends BaseFixture<string> {
+@StaticFixture({ dependencies: [TestFixture] })
+class TestFixture2 extends BaseStaticFixture<string> {
   public async install(): Promise<string> {
     return 'TestValue2';
   }
 }
 
-@Fixture({ dependencies: [TestFixture] })
-class TestingFixture extends BaseFixture<void> {
+@StaticFixture({ dependencies: [TestFixture] })
+class TestingFixture extends BaseStaticFixture<void> {
   public async install(): Promise<void> {
     expect(this.fixtureResultOf(TestFixture)).toEqual('TestValue1');
     expect(this.factoryOf(TargetEntity).random()).toMatchObject({ value: 'TestFactory' });
+    await expect(this.dynamicFixtureOf(TestDynamicFixture).install('hi')).resolves.toEqual('hihi');
+    expect(() => this.dynamicFixtureOf(TestFixture)).toThrowError();
+  }
+}
+
+@DynamicFixture({ dependencies: [TestFixture] })
+class TestDynamicFixture extends BaseDynamicFixture<string, string> {
+  public async install(manager: EntityManager, options: string): Promise<string> {
+    return options + options;
   }
 }
 
 describe('FixtureRoot', () => {
+  beforeEach(() => {
+    jest.spyOn(Importer.prototype, 'import').mockRestore();
+  });
   beforeAll(async () => {
     await createConnection({
       type: 'postgres',
@@ -81,52 +96,53 @@ describe('FixtureRoot', () => {
     it('loads', async () => {
       jest.spyOn(Importer.prototype, 'import').mockImplementation(async () => {
         return {
+          staticFixtures: [],
+          dynamicFixtures: [],
           factories: [TestFactory],
-          fixtures: [],
         };
       });
-      const instance = new FixtureRoot({ filePatterns: [] });
+      const instance = new FixtureContainer({ filePatterns: [] });
       await instance.loadFiles();
       expect(instance.factoryOf(TargetEntity)).toBeInstanceOf(TestFactory);
     });
     it("doesn't run if constructors are cached", async () => {
       const importMock = jest.fn(async () => {
         return {
+          staticFixtures: [],
+          dynamicFixtures: [],
           factories: [],
-          fixtures: [],
         };
       });
       jest.spyOn(Importer.prototype, 'import').mockImplementation(importMock);
-      const instance = new FixtureRoot({ filePatterns: [] });
+      const instance = new FixtureContainer({ filePatterns: [] });
       await instance.loadFiles();
       await instance.loadFiles();
       expect(importMock).toBeCalledTimes(1);
     });
   });
   describe('installFixtures', () => {
-    afterEach(() => {
-      jest.spyOn(Importer.prototype, 'import').mockRestore();
-    });
     it('throws if not loaded', async () => {
-      const instance = new FixtureRoot({ filePatterns: [] });
+      const instance = new FixtureContainer({ filePatterns: [] });
       await expect(instance.installFixtures()).rejects.toThrowError();
     });
     it('successfully loads and runs all fixtures', async () => {
       const importMock = jest.fn(async () => {
         return {
           factories: [],
-          fixtures: [TestFixture, TestFixture2],
+          staticFixtures: [TestFixture, TestFixture2],
+          dynamicFixtures: [TestDynamicFixture],
         };
       });
       jest.spyOn(Importer.prototype, 'import').mockImplementation(importMock);
-      const instance = new FixtureRoot({ filePatterns: [] });
+      const instance = new FixtureContainer({ filePatterns: [] });
       await instance.loadFiles();
       await instance.installFixtures();
       expect(instance.fixtureResultOf(TestFixture)).toEqual('TestValue1');
       expect(instance.fixtureResultOf(TestFixture2)).toEqual('TestValue2');
+      expect(instance.dynamicFixtureOf(TestDynamicFixture)).toBeInstanceOf(DynamicFixtureDelegate);
     });
     it('loads manually given fixtures', async () => {
-      const instance = new FixtureRoot({
+      const instance = new FixtureContainer({
         factories: [TestFactory],
         fixtures: [TestFixture, TestFixture2],
       });
@@ -139,7 +155,7 @@ describe('FixtureRoot', () => {
       instance.factoryOf(TargetEntity)!.random();
     });
     it('can use filter', async () => {
-      const instance = new FixtureRoot({
+      const instance = new FixtureContainer({
         factories: [],
         fixtures: [TestFixture, TestFixture2],
       });
@@ -151,7 +167,7 @@ describe('FixtureRoot', () => {
   });
   describe('clearFixtureResult', () => {
     it('clears cache', async () => {
-      const instance = new FixtureRoot({ fixtures: [TestFixture] });
+      const instance = new FixtureContainer({ fixtures: [TestFixture] });
       await instance.loadFiles();
       await instance.installFixtures();
       expect(instance.fixtureResultOf(TestFixture)).not.toBeUndefined();
@@ -161,19 +177,19 @@ describe('FixtureRoot', () => {
   });
   describe('getFactoryInstance', () => {
     it('returns undefined if not found', () => {
-      const instance = new FixtureRoot({ filePatterns: [] });
+      const instance = new FixtureContainer({ filePatterns: [] });
       expect(instance.factoryOf(TargetEntity)).toBeUndefined();
     });
   });
   describe('fixtureResultOf', () => {
     it('throws error if given type is not a fixture', () => {
-      const instance = new FixtureRoot({ filePatterns: [] });
+      const instance = new FixtureContainer({ filePatterns: [] });
       expect(() =>
-        instance.fixtureResultOf(TargetEntity as unknown as Type<BaseFixture<unknown>>)
+        instance.fixtureResultOf(TargetEntity as unknown as Type<BaseStaticFixture<unknown>>)
       ).toThrowError();
     });
     it('returns undefined if not found', () => {
-      const instance = new FixtureRoot({ filePatterns: [] });
+      const instance = new FixtureContainer({ filePatterns: [] });
       expect(instance.fixtureResultOf(TestFixture)).toBeUndefined();
     });
   });
@@ -183,23 +199,25 @@ describe('FixtureRoot', () => {
       const importMock = jest.fn(async () => {
         return {
           factories: [TestFactory],
-          fixtures: [TestFixture, TestFixture2, TestingFixture],
+          dynamicFixtures: [TestDynamicFixture],
+          staticFixtures: [TestFixture, TestFixture2, TestingFixture],
         };
       });
       jest.spyOn(Importer.prototype, 'import').mockImplementation(importMock);
-      const instance = new FixtureRoot({ filePatterns: [] });
+      const instance = new FixtureContainer({ filePatterns: [] });
       await instance.loadFiles();
       await instance.installFixtures();
     });
     it('factory', async () => {
       const importMock = jest.fn(async () => {
         return {
+          staticFixtures: [],
+          dynamicFixtures: [],
           factories: [TestFactory, TestingFactory],
-          fixtures: [],
         };
       });
       jest.spyOn(Importer.prototype, 'import').mockImplementation(importMock);
-      const instance = new FixtureRoot({ filePatterns: [] });
+      const instance = new FixtureContainer({ filePatterns: [] });
       await instance.loadFiles();
       const factory = instance.factoryOf(EmptyEntity);
       expect(factory).not.toBeUndefined();
@@ -208,7 +226,7 @@ describe('FixtureRoot', () => {
   });
   describe('named factories', () => {
     it('resolves named factories', async () => {
-      const instance = new FixtureRoot({ factories: [TestFactory, AlternativeFactory] });
+      const instance = new FixtureContainer({ factories: [TestFactory, AlternativeFactory] });
       await instance.loadFiles();
       expect(instance.factoryOf(TargetEntity)).toBeInstanceOf(TestFactory);
       expect(instance.factoryOf(TargetEntity, 'default')).toBeInstanceOf(TestFactory);

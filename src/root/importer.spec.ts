@@ -1,4 +1,4 @@
-import { TestFactory, TestFixture } from '../test/importTestTarget/file1';
+import { TestDynamicFixture, TestFactory, TestFixture } from '../test/importTestTarget/file1';
 import Test2 from '../test/importTestTarget/file2';
 import Importer from './importer';
 
@@ -8,7 +8,8 @@ describe('importer', () => {
     const result = await instance.import();
     expect(result).toMatchObject({
       factories: [TestFactory],
-      fixtures: [TestFixture],
+      staticFixtures: [TestFixture],
+      dynamicFixtures: [TestDynamicFixture],
     });
   });
   it('works with glob pattern', async () => {
@@ -16,7 +17,8 @@ describe('importer', () => {
     const result = await instance.import();
     expect(result).toMatchObject({
       factories: [TestFactory],
-      fixtures: [TestFixture, Test2],
+      staticFixtures: [TestFixture, Test2],
+      dynamicFixtures: [TestDynamicFixture],
     });
   });
 });

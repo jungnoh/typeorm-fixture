@@ -1,11 +1,17 @@
 import BaseFactory from '../classes/BaseFactory';
-import BaseFixture from '../classes/BaseFixture';
-import { FactoryConstructor, FixtureConstructor, FixtureResult } from '../classes/types';
-import { CLASS_IDENTIFIER, DEFAULT_FACTORY_NAME, FACTORY_NAME } from '../decorators/constants';
-import { getFactoryIdentifier } from '../decorators/Factory';
+import BaseDynamicFixture from '../classes/DynamicFixture';
+import DynamicFixtureDelegate from '../classes/DynamicFixtureDelegate';
+import BaseStaticFixture from '../classes/StaticFixture';
+import {
+  DynamicFixtureConstructor,
+  FactoryConstructor,
+  FixtureConstructor,
+  FixtureResult,
+} from '../classes/types';
+import { createFactoryIdentifier, getIdentifier } from '../decorators/identifiers';
 import { Type } from '../types';
 import FixtureManager, { FixtureLoadFilters } from './fixtureManager';
-import Importer, { ImportResult } from './importer';
+import Importer, { ImportResult, sortConstructors } from './importer';
 
 export interface FixtureRootOptions {
   filePatterns?: string[];
@@ -13,27 +19,35 @@ export interface FixtureRootOptions {
   fixtures?: FixtureConstructor[];
 }
 
-export default class FixtureRoot {
+export default class FixtureContainer {
   constructor(private readonly options: FixtureRootOptions) {}
 
   private constructorCache?: ImportResult;
-  private factoryInstanceCache: Record<string, Record<string, BaseFactory<unknown>>> = {};
-  private fixtureResultCache: Record<string, unknown> = {};
+  private factoryInstanceCache: Record<string, BaseFactory<unknown>> = {};
+  private staticFixtureResultCache: Record<string, unknown> = {};
+  private dynamicFixtureConstructors: Record<string, DynamicFixtureConstructor> = {};
 
   public async loadFiles(): Promise<void> {
     if (this.constructorCache) {
       return;
     }
     this.constructorCache = await new Importer(this.options.filePatterns ?? []).import();
-    this.constructorCache.factories.push(...(this.options.factories ?? []));
-    this.constructorCache.fixtures.push(...(this.options.fixtures ?? []));
+
+    const manuallyImportedItems = sortConstructors([
+      ...(this.options.factories ?? []),
+      ...(this.options.fixtures ?? []),
+    ]);
+    this.constructorCache.dynamicFixtures.push(...manuallyImportedItems.dynamicFixtures);
+    this.constructorCache.staticFixtures.push(...manuallyImportedItems.staticFixtures);
+    this.constructorCache.factories.push(...manuallyImportedItems.factories);
+
     for (const factoryConstructor of this.constructorCache.factories) {
-      const targetName = Reflect.getMetadata(CLASS_IDENTIFIER, factoryConstructor.prototype);
-      const name = Reflect.getMetadata(FACTORY_NAME, factoryConstructor.prototype);
-      if (!(targetName in this.factoryInstanceCache)) {
-        this.factoryInstanceCache[targetName] = {};
-      }
-      this.factoryInstanceCache[targetName][name] = this.instantiateFactory(factoryConstructor);
+      const targetName = getIdentifier(factoryConstructor);
+      this.factoryInstanceCache[targetName] = this.instantiateFactory(factoryConstructor);
+    }
+    for (const dynamicFixture of this.constructorCache.dynamicFixtures) {
+      const targetName = getIdentifier(dynamicFixture);
+      this.dynamicFixtureConstructors[targetName] = dynamicFixture;
     }
   }
 
@@ -42,39 +56,53 @@ export default class FixtureRoot {
       throw new Error('Fixture files have not been imported yet');
     }
     const manager = new FixtureManager(
-      this.constructorCache.fixtures,
+      {
+        dynamic: this.constructorCache.dynamicFixtures,
+        static: this.constructorCache.staticFixtures,
+      },
       (buildMe) => this.instantiateFixture(buildMe),
       (key, value) => {
-        this.fixtureResultCache[key] = value;
+        this.staticFixtureResultCache[key] = value;
       }
     );
     await manager.loadAll(options);
   }
 
   public clearFixtureResult(): void {
-    this.fixtureResultCache = {};
+    this.staticFixtureResultCache = {};
   }
 
   public factoryOf<EntityType>(
     type: Type<EntityType>,
-    name: string = DEFAULT_FACTORY_NAME
+    name?: string
   ): BaseFactory<EntityType> | undefined {
-    const key = getFactoryIdentifier(type.name);
-    if (key in this.factoryInstanceCache && name in this.factoryInstanceCache[key]) {
-      return this.factoryInstanceCache[key][name] as BaseFactory<EntityType>;
+    const key = createFactoryIdentifier(type, name);
+    if (key in this.factoryInstanceCache) {
+      return this.factoryInstanceCache[key] as BaseFactory<EntityType>;
     }
     return undefined;
   }
 
-  public fixtureResultOf<T extends BaseFixture<unknown>>(
+  public fixtureResultOf<T extends BaseStaticFixture<unknown>>(
     type: Type<T>
   ): FixtureResult<T> | undefined {
-    const key = Reflect.getMetadata(CLASS_IDENTIFIER, type.prototype);
-    if (!key) {
-      throw new Error(`'${type.name}' is not a valid fixture.`);
+    const key = getIdentifier(type);
+    if (key in this.staticFixtureResultCache) {
+      return this.staticFixtureResultCache[key] as FixtureResult<T>;
     }
-    if (key in this.fixtureResultCache) {
-      return this.fixtureResultCache[key] as FixtureResult<T>;
+    return undefined;
+  }
+
+  public dynamicFixtureOf<T, U>(
+    type: Type<BaseDynamicFixture<T, U>>
+  ): DynamicFixtureDelegate<T, U> | undefined {
+    const key = getIdentifier(type);
+    if (key in this.dynamicFixtureConstructors) {
+      const instance = this.instantiateFixture(this.dynamicFixtureConstructors[key]);
+      return new DynamicFixtureDelegate<T, U>(
+        type,
+        instance as Exclude<BaseDynamicFixture<T, U>, BaseStaticFixture<T>>
+      );
     }
     return undefined;
   }
@@ -89,6 +117,7 @@ export default class FixtureRoot {
     return new buildMe({
       getFactoryInstance: (type) => this.factoryOf(type),
       fixtureResultOf: (type) => this.fixtureResultOf(type),
+      dynamicFixtureOf: (type) => this.dynamicFixtureOf(type),
     });
   }
 }

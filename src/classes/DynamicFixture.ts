@@ -1,15 +1,16 @@
 import { EntityManager } from 'typeorm';
-import { CLASS_IDENTIFIER } from '../decorators/constants';
 import { FixtureBridge } from '../root/bridge';
 import { Type, UnPromisify } from '../types';
 import BaseFactory from './BaseFactory';
+import DynamicFixtureDelegate from './DynamicFixtureDelegate';
+import BaseStaticFixture from './StaticFixture';
 
-export default abstract class BaseFixture<T = void> {
+export default abstract class BaseDynamicFixture<ResultType, ParameterType> {
   constructor(private readonly bridge: FixtureBridge) {}
 
-  public abstract install(manager: EntityManager): Promise<T>;
+  public abstract install(manager: EntityManager, options: ParameterType): Promise<ResultType>;
 
-  protected fixtureResultOf<FixtureType extends BaseFixture<unknown>>(
+  protected fixtureResultOf<FixtureType extends BaseStaticFixture<unknown>>(
     type: Type<FixtureType>
   ): UnPromisify<ReturnType<FixtureType['install']>> {
     const result = this.bridge.fixtureResultOf(type);
@@ -27,7 +28,13 @@ export default abstract class BaseFixture<T = void> {
     return result;
   }
 
-  protected getFixtureName(): string {
-    return Reflect.getMetadata(CLASS_IDENTIFIER, this);
+  protected dynamicFixtureOf<T, U>(
+    type: Type<BaseDynamicFixture<T, U>>
+  ): DynamicFixtureDelegate<T, U> {
+    const result = this.bridge.dynamicFixtureOf(type);
+    if (!result) {
+      throw new Error(`Cannot find DynamicFixture of ${type.name}`);
+    }
+    return result;
   }
 }

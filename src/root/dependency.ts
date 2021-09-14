@@ -26,7 +26,7 @@ function sort(input: DependencyNode[], constraints?: DependencyConstraints): str
 
   const node = (key: string): boolean => {
     let rootFound = !constraints?.traversalRoots || constraints.traversalRoots.includes(key);
-    if (constraints?.traversalNodes && constraints?.traversalNodes.includes(key)) {
+    if (constraints?.traversalNodes && constraints.traversalNodes.includes(key)) {
       throw new Error(`Node ${key} was not allowed but in the dependency tree.`);
     }
     if (keyMap[key].check === 'done') {

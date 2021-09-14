@@ -2,21 +2,11 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import { BaseFactory } from '..';
 import { Type } from '../types';
-import {
-  CLASS_IDENTIFIER,
-  DEFAULT_FACTORY_NAME,
-  FACTORY_MARK,
-  FACTORY_NAME,
-  FACTORY_TARGET,
-  MARK_VALUE,
-} from './constants';
+import { CLASS_IDENTIFIER, FACTORY_MARK, FACTORY_TARGET, MARK_VALUE } from './constants';
+import { createFactoryIdentifier } from './identifiers';
 
 interface FactoryDecoratorOptions {
   name?: string;
-}
-
-export function getFactoryIdentifier(typeName: string): string {
-  return `FACTORY_${typeName}`;
 }
 
 export default function Factory<EntityType, T extends { new (...args: any[]): any }>(
@@ -30,10 +20,9 @@ export default function Factory<EntityType, T extends { new (...args: any[]): an
     }
     Reflect.defineMetadata(FACTORY_MARK, MARK_VALUE, target.prototype);
 
-    const factoryName = getFactoryIdentifier(of.name);
+    const factoryName = createFactoryIdentifier(of, options?.name);
     Reflect.defineMetadata(CLASS_IDENTIFIER, factoryName, target.prototype);
     Reflect.defineMetadata(FACTORY_TARGET, of, target.prototype);
-    Reflect.defineMetadata(FACTORY_NAME, options?.name ?? DEFAULT_FACTORY_NAME, target.prototype);
 
     return class extends target {
       constructor(...args: any[]) {

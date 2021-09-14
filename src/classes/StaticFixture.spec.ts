@@ -1,29 +1,29 @@
 import 'reflect-metadata';
 import { EntityManager } from 'typeorm';
-import Fixture from '../decorators/Fixture';
+import { StaticFixture } from '../decorators/Fixture';
 import { FixtureBridge } from '../root/bridge';
 import { Type, UnPromisify } from '../types';
 import BaseFactory from './BaseFactory';
-import BaseFixture from './BaseFixture';
+import BaseStaticFixture from './StaticFixture';
 
 class TestEntity {
   v!: string;
 }
 
-@Fixture()
-class TestTargetFixture extends BaseFixture<string> {
+@StaticFixture()
+class TestTargetFixture extends BaseStaticFixture<string> {
   public async install(manager: EntityManager): Promise<string> {
     return 'asdf';
   }
 }
 
-@Fixture()
-class TestFixture extends BaseFixture<void> {
+@StaticFixture()
+class TestFixture extends BaseStaticFixture<void> {
   public install(manager: EntityManager): Promise<void> {
     throw new Error('Method not implemented.');
   }
 
-  public testFixtureResultOf<FixtureType extends BaseFixture<unknown>>(
+  public testFixtureResultOf<FixtureType extends BaseStaticFixture<unknown>>(
     type: Type<FixtureType>
   ): UnPromisify<ReturnType<FixtureType['install']>> {
     return this.fixtureResultOf(type);
@@ -32,25 +32,13 @@ class TestFixture extends BaseFixture<void> {
   public testFactoryOf<EntityType>(type: Type<EntityType>): BaseFactory<EntityType> {
     return this.factoryOf(type);
   }
-
-  public testGetFixtureName(): string {
-    return this.getFixtureName();
-  }
 }
 
-describe('BaseFixture', () => {
-  it('getFixtureName', () => {
-    const mockedBridge = {
-      getFactoryInstance: jest.fn(),
-      fixtureResultOf: jest.fn(),
-    };
-    const fixture = new TestFixture(mockedBridge);
-    expect(fixture.testGetFixtureName()).toEqual(TestFixture.name);
-  });
+describe('StaticFixture', () => {
   describe('fixtureResultOf', () => {
     const mockedBridge = {
       getFactoryInstance: jest.fn(),
-      fixtureResultOf: jest.fn((type: Type<BaseFixture<unknown>>) => {
+      fixtureResultOf: jest.fn((type: Type<BaseStaticFixture<unknown>>) => {
         if (type.name === TestTargetFixture.name) return 'asdf';
         return undefined;
       }),
