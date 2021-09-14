@@ -1,5 +1,5 @@
 import BaseFactory from '../classes/BaseFactory';
-import StaticFixture from '../classes/StaticFixture';
+import BaseStaticFixture from '../classes/StaticFixture';
 import { FactoryConstructor, FixtureConstructor, FixtureResult } from '../classes/types';
 import { createFactoryIdentifier, getIdentifier } from '../decorators/identifiers';
 import { Type } from '../types';
@@ -61,7 +61,7 @@ export default class FixtureRoot {
     return undefined;
   }
 
-  public fixtureResultOf<T extends StaticFixture<unknown>>(
+  public fixtureResultOf<T extends BaseStaticFixture<unknown>>(
     type: Type<T>
   ): FixtureResult<T> | undefined {
     const key = getIdentifier(type);

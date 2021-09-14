@@ -1,25 +1,25 @@
 import { createConnection, EntityManager, getConnection } from 'typeorm';
 import { FixtureRoot } from '..';
-import StaticFixture from '../classes/StaticFixture';
-import Fixture from '../decorators/Fixture';
+import BaseStaticFixture from '../classes/StaticFixture';
+import { StaticFixture } from '../decorators/Fixture';
 import Importer from './importer';
 
-@Fixture()
-class NoTransactionFixture extends StaticFixture<number> {
+@StaticFixture()
+class NoTransactionFixture extends BaseStaticFixture<number> {
   public async install() {
     return 1;
   }
 }
 
-@Fixture({ dependencies: [NoTransactionFixture] })
-class DependentFixture extends StaticFixture<number> {
+@StaticFixture({ dependencies: [NoTransactionFixture] })
+class DependentFixture extends BaseStaticFixture<number> {
   public async install() {
     return 2;
   }
 }
 
-@Fixture({ isolationLevel: 'default' })
-class TransactionFixture extends StaticFixture<void> {
+@StaticFixture({ isolationLevel: 'default' })
+class TransactionFixture extends BaseStaticFixture<void> {
   public async install(manager: EntityManager) {
     expect(manager.connection.isConnected).toEqual(true);
     const result = await manager.query('SHOW TRANSACTION ISOLATION LEVEL');
@@ -28,8 +28,8 @@ class TransactionFixture extends StaticFixture<void> {
   }
 }
 
-@Fixture({ isolationLevel: 'SERIALIZABLE' })
-class SerializableFixture extends StaticFixture<void> {
+@StaticFixture({ isolationLevel: 'SERIALIZABLE' })
+class SerializableFixture extends BaseStaticFixture<void> {
   public async install(manager: EntityManager) {
     expect(manager.connection.isConnected).toEqual(true);
     const result = await manager.query('SHOW TRANSACTION ISOLATION LEVEL');

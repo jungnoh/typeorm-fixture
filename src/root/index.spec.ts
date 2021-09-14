@@ -4,8 +4,8 @@ import Factory from '../decorators/Factory';
 import Importer from './importer';
 import { createConnection, getConnection } from 'typeorm';
 import { Type } from '../types';
-import StaticFixture from '../classes/StaticFixture';
-import Fixture from '../decorators/Fixture';
+import BaseStaticFixture from '../classes/StaticFixture';
+import { StaticFixture } from '../decorators/Fixture';
 
 class TargetEntity {
   public value!: string;
@@ -39,22 +39,22 @@ class TestingFactory extends BaseFactory<EmptyEntity> {
   }
 }
 
-@Fixture()
-class TestFixture extends StaticFixture<string> {
+@StaticFixture()
+class TestFixture extends BaseStaticFixture<string> {
   public async install(): Promise<string> {
     return 'TestValue1';
   }
 }
 
-@Fixture({ dependencies: [TestFixture] })
-class TestFixture2 extends StaticFixture<string> {
+@StaticFixture({ dependencies: [TestFixture] })
+class TestFixture2 extends BaseStaticFixture<string> {
   public async install(): Promise<string> {
     return 'TestValue2';
   }
 }
 
-@Fixture({ dependencies: [TestFixture] })
-class TestingFixture extends StaticFixture<void> {
+@StaticFixture({ dependencies: [TestFixture] })
+class TestingFixture extends BaseStaticFixture<void> {
   public async install(): Promise<void> {
     expect(this.fixtureResultOf(TestFixture)).toEqual('TestValue1');
     expect(this.factoryOf(TargetEntity).random()).toMatchObject({ value: 'TestFactory' });
@@ -170,7 +170,7 @@ describe('FixtureRoot', () => {
     it('throws error if given type is not a fixture', () => {
       const instance = new FixtureRoot({ filePatterns: [] });
       expect(() =>
-        instance.fixtureResultOf(TargetEntity as unknown as Type<StaticFixture<unknown>>)
+        instance.fixtureResultOf(TargetEntity as unknown as Type<BaseStaticFixture<unknown>>)
       ).toThrowError();
     });
     it('returns undefined if not found', () => {

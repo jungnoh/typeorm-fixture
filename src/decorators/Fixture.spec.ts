@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import StaticFixture from '../classes/StaticFixture';
+import BaseStaticFixture from '../classes/StaticFixture';
 import {
   CLASS_DEPENDENCIES,
   CLASS_IDENTIFIER,
@@ -7,24 +7,24 @@ import {
   FIXTURE_TX_LEVEL,
   MARK_VALUE,
 } from './constants';
-import Fixture from './Fixture';
+import { StaticFixture } from './Fixture';
 
-@Fixture()
-class TestFixture extends StaticFixture<void> {
+@StaticFixture()
+class TestFixture extends BaseStaticFixture<void> {
   public install(): Promise<void> {
     throw new Error('Method not implemented.');
   }
 }
 
-@Fixture({ dependencies: [TestFixture] })
-class DepTestFixture extends StaticFixture<void> {
+@StaticFixture({ dependencies: [TestFixture] })
+class DepTestFixture extends BaseStaticFixture<void> {
   public install(): Promise<void> {
     throw new Error('Method not implemented.');
   }
 }
 
-@Fixture({ isolationLevel: 'SERIALIZABLE' })
-class TxFixture extends StaticFixture<void> {
+@StaticFixture({ isolationLevel: 'SERIALIZABLE' })
+class TxFixture extends BaseStaticFixture<void> {
   public install(): Promise<void> {
     throw new Error('Method not implemented.');
   }
@@ -56,10 +56,10 @@ describe('@Fixture', () => {
   });
   it('throws error if decorated twice', () => {
     const test = () => {
-      @Fixture()
-      @Fixture()
+      @StaticFixture()
+      @StaticFixture()
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      class DoubleTestFixture extends StaticFixture<void> {
+      class DoubleTestFixture extends BaseStaticFixture<void> {
         public install(): Promise<void> {
           throw new Error('Method not implemented.');
         }

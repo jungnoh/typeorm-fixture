@@ -1,3 +1,6 @@
-import DynamicFixture from './DynamicFixture';
+import BaseDynamicFixture from './DynamicFixture';
 
-export default abstract class StaticFixture<T = void> extends DynamicFixture<T, undefined> {}
+export default abstract class BaseStaticFixture<T = void> extends BaseDynamicFixture<
+  T,
+  undefined
+> {}

@@ -1,6 +1,6 @@
 import { EntityManager, getManager } from 'typeorm';
 import { IsolationLevel } from 'typeorm/driver/types/IsolationLevel';
-import StaticFixture from '../classes/StaticFixture';
+import BaseStaticFixture from '../classes/StaticFixture';
 import { FixtureConstructor } from '../classes/types';
 import { CLASS_DEPENDENCIES, FIXTURE_TX_LEVEL } from '../decorators/constants';
 import { getIdentifier } from '../decorators/identifiers';
@@ -14,7 +14,7 @@ export interface FixtureLoadFilters {
 export default class FixtureManager {
   constructor(
     private readonly constructors: FixtureConstructor[],
-    private readonly instantiator: (buildMe: FixtureConstructor) => StaticFixture<unknown>,
+    private readonly instantiator: (buildMe: FixtureConstructor) => BaseStaticFixture<unknown>,
     private readonly onFixtureResult: (key: string, value: unknown) => void
   ) {}
 
