@@ -7,6 +7,10 @@ export enum FixtureType {
   DYNAMIC = 'DYNAMIC',
 }
 
+function createRandomIdentifier() {
+  return Math.random().toString(36).substring(2, 10).toUpperCase();
+}
+
 export function createFactoryIdentifier(
   of: Type<unknown>,
   name: string = DEFAULT_FACTORY_NAME
@@ -15,7 +19,7 @@ export function createFactoryIdentifier(
 }
 
 export function createFixtureIdentifier(type: FixtureType, of: FixtureConstructor): string {
-  return `FIXTURE_${type.toString()}_${of.name}`;
+  return `FIXTURE_${type.toString()}_${of.name}_${createRandomIdentifier()}`;
 }
 
 export function getIdentifier(of: FixtureConstructor | FactoryConstructor): string {

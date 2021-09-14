@@ -36,8 +36,8 @@ describe('@Fixture', () => {
     expect(Reflect.getMetadata(FIXTURE_MARK, TestFixture.prototype)).toEqual(MARK_VALUE);
   });
   it('sets class identifier as constructor name', () => {
-    expect(Reflect.getMetadata(CLASS_IDENTIFIER, TestFixture.prototype)).toEqual(
-      `FIXTURE_STATIC_${TestFixture.name}`
+    expect(Reflect.getMetadata(CLASS_IDENTIFIER, TestFixture.prototype)).toMatch(
+      /^FIXTURE_STATIC_TestFixture_.{8}$/
     );
   });
   it('dependencies is empty array if not given', () => {
