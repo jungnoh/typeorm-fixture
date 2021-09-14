@@ -11,7 +11,6 @@ import BaseDynamicFixture from '../classes/DynamicFixture';
 import { FixtureOptions } from './types';
 import { createFixtureIdentifier, FixtureType } from './identifiers';
 import BaseStaticFixture from '../classes/StaticFixture';
-import { DynamicFixtureOnly } from '../classes/types';
 
 function commonFixtureMarks<
   T extends { new (...args: any[]): BaseDynamicFixture<unknown, unknown> }
@@ -42,7 +41,7 @@ export function StaticFixture<T extends { new (...args: any[]): BaseStaticFixtur
 
 export function DynamicFixture<
   T extends {
-    new (...args: any[]): DynamicFixtureOnly;
+    new (...args: any[]): BaseDynamicFixture<unknown, unknown>;
   }
 >(options?: FixtureOptions) {
   return (target: T): void => {
