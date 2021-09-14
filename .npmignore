@@ -12,3 +12,10 @@ coverage
 .eslintrc.jsDockerfile
 Makefile
 Dockerfile
+
+**/*.spec.js
+dist/**/*.ts
+dist/**/*.d.js
+!dist/**/*.d.ts
+**/*.spec.d.ts
+dist/test/importTestTarget/**/*
