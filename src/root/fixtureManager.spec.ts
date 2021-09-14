@@ -62,7 +62,8 @@ describe('FixtureManager', () => {
     const importMock = jest.fn(async () => {
       return {
         factories: [],
-        fixtures: [NoTransactionFixture, TransactionFixture, SerializableFixture],
+        dynamicFixtures: [],
+        staticFixtures: [NoTransactionFixture, TransactionFixture, SerializableFixture],
       };
     });
     jest.spyOn(Importer.prototype, 'import').mockImplementation(importMock);

@@ -1,9 +1,13 @@
 import { EntityManager, getManager } from 'typeorm';
 import { IsolationLevel } from 'typeorm/driver/types/IsolationLevel';
-import BaseStaticFixture from '../classes/StaticFixture';
-import { FixtureConstructor } from '../classes/types';
+import BaseDynamicFixture from '../classes/DynamicFixture';
+import {
+  DynamicFixtureConstructor,
+  FixtureConstructor,
+  StaticFixtureConstructor,
+} from '../classes/types';
 import { CLASS_DEPENDENCIES, FIXTURE_TX_LEVEL } from '../decorators/constants';
-import { getIdentifier } from '../decorators/identifiers';
+import { FixtureType, getFixtureType, getIdentifier } from '../decorators/identifiers';
 import resolveLoadOrder from './dependency';
 
 export interface FixtureLoadFilters {
@@ -11,10 +15,17 @@ export interface FixtureLoadFilters {
   propagateDependencies?: boolean;
 }
 
+export interface FixtureConstructors {
+  dynamic: DynamicFixtureConstructor[];
+  static: StaticFixtureConstructor[];
+}
+
 export default class FixtureManager {
   constructor(
-    private readonly constructors: FixtureConstructor[],
-    private readonly instantiator: (buildMe: FixtureConstructor) => BaseStaticFixture<unknown>,
+    private readonly constructors: FixtureConstructors,
+    private readonly instantiator: (
+      buildMe: FixtureConstructor
+    ) => BaseDynamicFixture<unknown, unknown>,
     private readonly onFixtureResult: (key: string, value: unknown) => void
   ) {}
 
@@ -40,6 +51,9 @@ export default class FixtureManager {
 
     const fixtureMap = this.buildFixtureMap();
     for (const key of loadOrder) {
+      if (getFixtureType(fixtureMap[key]) !== FixtureType.STATIC) {
+        continue;
+      }
       const instance = this.instantiator(fixtureMap[key]);
       const result = await this.runWithScopedConnection(
         fixtureMap[key],
@@ -78,7 +92,7 @@ export default class FixtureManager {
   }
 
   private buildDependencyInput() {
-    return this.constructors.map((item) => {
+    return [...this.constructors.dynamic, ...this.constructors.static].map((item) => {
       const dependencies = Reflect.getMetadata(CLASS_DEPENDENCIES, item.prototype);
       return {
         dependencies: this.depListToString(dependencies),
@@ -88,7 +102,7 @@ export default class FixtureManager {
   }
 
   private buildFixtureMap(): Record<string, FixtureConstructor> {
-    return this.constructors.reduce((prev, now) => {
+    return [...this.constructors.dynamic, ...this.constructors.static].reduce((prev, now) => {
       return { ...prev, [getIdentifier(now)]: now };
     }, {});
   }

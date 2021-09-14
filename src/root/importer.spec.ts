@@ -8,7 +8,8 @@ describe('importer', () => {
     const result = await instance.import();
     expect(result).toMatchObject({
       factories: [TestFactory],
-      fixtures: [TestFixture],
+      staticFixtures: [TestFixture],
+      dynamicFixtures: [],
     });
   });
   it('works with glob pattern', async () => {
@@ -16,7 +17,8 @@ describe('importer', () => {
     const result = await instance.import();
     expect(result).toMatchObject({
       factories: [TestFactory],
-      fixtures: [TestFixture, Test2],
+      staticFixtures: [TestFixture, Test2],
+      dynamicFixtures: [],
     });
   });
 });

@@ -62,6 +62,9 @@ class TestingFixture extends BaseStaticFixture<void> {
 }
 
 describe('FixtureRoot', () => {
+  beforeEach(() => {
+    jest.spyOn(Importer.prototype, 'import').mockRestore();
+  });
   beforeAll(async () => {
     await createConnection({
       type: 'postgres',
@@ -82,8 +85,9 @@ describe('FixtureRoot', () => {
     it('loads', async () => {
       jest.spyOn(Importer.prototype, 'import').mockImplementation(async () => {
         return {
+          staticFixtures: [],
+          dynamicFixtures: [],
           factories: [TestFactory],
-          fixtures: [],
         };
       });
       const instance = new FixtureRoot({ filePatterns: [] });
@@ -93,8 +97,9 @@ describe('FixtureRoot', () => {
     it("doesn't run if constructors are cached", async () => {
       const importMock = jest.fn(async () => {
         return {
+          staticFixtures: [],
+          dynamicFixtures: [],
           factories: [],
-          fixtures: [],
         };
       });
       jest.spyOn(Importer.prototype, 'import').mockImplementation(importMock);
@@ -105,9 +110,6 @@ describe('FixtureRoot', () => {
     });
   });
   describe('installFixtures', () => {
-    afterEach(() => {
-      jest.spyOn(Importer.prototype, 'import').mockRestore();
-    });
     it('throws if not loaded', async () => {
       const instance = new FixtureRoot({ filePatterns: [] });
       await expect(instance.installFixtures()).rejects.toThrowError();
@@ -116,7 +118,8 @@ describe('FixtureRoot', () => {
       const importMock = jest.fn(async () => {
         return {
           factories: [],
-          fixtures: [TestFixture, TestFixture2],
+          staticFixtures: [TestFixture, TestFixture2],
+          dynamicFixtures: [],
         };
       });
       jest.spyOn(Importer.prototype, 'import').mockImplementation(importMock);
@@ -184,7 +187,8 @@ describe('FixtureRoot', () => {
       const importMock = jest.fn(async () => {
         return {
           factories: [TestFactory],
-          fixtures: [TestFixture, TestFixture2, TestingFixture],
+          dynamicFixtures: [],
+          staticFixtures: [TestFixture, TestFixture2, TestingFixture],
         };
       });
       jest.spyOn(Importer.prototype, 'import').mockImplementation(importMock);
@@ -195,8 +199,9 @@ describe('FixtureRoot', () => {
     it('factory', async () => {
       const importMock = jest.fn(async () => {
         return {
+          staticFixtures: [],
+          dynamicFixtures: [],
           factories: [TestFactory, TestingFactory],
-          fixtures: [],
         };
       });
       jest.spyOn(Importer.prototype, 'import').mockImplementation(importMock);

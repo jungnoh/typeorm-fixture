@@ -4,7 +4,7 @@ import { FactoryConstructor, FixtureConstructor, FixtureResult } from '../classe
 import { createFactoryIdentifier, getIdentifier } from '../decorators/identifiers';
 import { Type } from '../types';
 import FixtureManager, { FixtureLoadFilters } from './fixtureManager';
-import Importer, { ImportResult } from './importer';
+import Importer, { ImportResult, sortConstructors } from './importer';
 
 export interface FixtureRootOptions {
   filePatterns?: string[];
@@ -24,8 +24,15 @@ export default class FixtureRoot {
       return;
     }
     this.constructorCache = await new Importer(this.options.filePatterns ?? []).import();
-    this.constructorCache.factories.push(...(this.options.factories ?? []));
-    this.constructorCache.fixtures.push(...(this.options.fixtures ?? []));
+
+    const manuallyImportedItems = sortConstructors([
+      ...(this.options.factories ?? []),
+      ...(this.options.fixtures ?? []),
+    ]);
+    this.constructorCache.dynamicFixtures.push(...manuallyImportedItems.dynamicFixtures);
+    this.constructorCache.staticFixtures.push(...manuallyImportedItems.staticFixtures);
+    this.constructorCache.factories.push(...manuallyImportedItems.factories);
+
     for (const factoryConstructor of this.constructorCache.factories) {
       const targetName = getIdentifier(factoryConstructor);
       this.factoryInstanceCache[targetName] = this.instantiateFactory(factoryConstructor);
@@ -37,7 +44,10 @@ export default class FixtureRoot {
       throw new Error('Fixture files have not been imported yet');
     }
     const manager = new FixtureManager(
-      this.constructorCache.fixtures,
+      {
+        dynamic: this.constructorCache.dynamicFixtures,
+        static: this.constructorCache.staticFixtures,
+      },
       (buildMe) => this.instantiateFixture(buildMe),
       (key, value) => {
         this.fixtureResultCache[key] = value;

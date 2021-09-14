@@ -1,6 +1,6 @@
 import { FactoryConstructor, FixtureConstructor } from '../classes/types';
 import { Type } from '../types';
-import { CLASS_IDENTIFIER, DEFAULT_FACTORY_NAME } from './constants';
+import { CLASS_IDENTIFIER, DEFAULT_FACTORY_NAME, FIXTURE_TYPE } from './constants';
 
 export enum FixtureType {
   STATIC = 'STATIC',
@@ -28,4 +28,8 @@ export function getIdentifier(of: FixtureConstructor | FactoryConstructor): stri
     throw new Error(`Cannot resolve identifer of ${of.name}`);
   }
   return result;
+}
+
+export function getFixtureType(of: FixtureConstructor): FixtureType {
+  return Reflect.getMetadata(FIXTURE_TYPE, of.prototype);
 }

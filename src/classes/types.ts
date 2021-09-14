@@ -10,13 +10,13 @@ export type FixtureConstructor = new (bridge: FixtureBridge) => BaseDynamicFixtu
   unknown,
   unknown
 >;
-
-export type StaticFixtureConstructor = new (bridge: FixtureBridge) => BaseStaticFixture<unknown>;
-
 export type DynamicFixtureOnly = Exclude<
   BaseDynamicFixture<unknown, unknown>,
   BaseStaticFixture<unknown>
 >;
+
+export type StaticFixtureConstructor = new (bridge: FixtureBridge) => BaseStaticFixture<unknown>;
+export type DynamicFixtureConstructor = new (bridge: FixtureBridge) => DynamicFixtureOnly;
 
 export type FixtureResult<FixtureType extends BaseDynamicFixture<unknown, unknown>> = UnPromisify<
   ReturnType<FixtureType['install']>
