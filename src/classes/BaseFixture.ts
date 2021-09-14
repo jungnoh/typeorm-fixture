@@ -9,10 +9,10 @@ export default abstract class BaseFixture<T = void> {
 
   public abstract install(manager: EntityManager): Promise<T>;
 
-  protected loadFixtureResult<FixtureType extends BaseFixture<unknown>>(
+  protected fixtureResultOf<FixtureType extends BaseFixture<unknown>>(
     type: Type<FixtureType>
   ): UnPromisify<ReturnType<FixtureType['install']>> {
-    const result = this.bridge.getFixtureResult(type);
+    const result = this.bridge.fixtureResultOf(type);
     if (!result) {
       throw new Error(`Cannot load result of fixture ${type.name}`);
     }

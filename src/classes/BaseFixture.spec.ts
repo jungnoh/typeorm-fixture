@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { Connection, EntityManager } from 'typeorm';
+import { EntityManager } from 'typeorm';
 import Fixture from '../decorators/Fixture';
 import { FixtureBridge } from '../root/bridge';
 import { Type, UnPromisify } from '../types';
@@ -23,10 +23,10 @@ class TestFixture extends BaseFixture<void> {
     throw new Error('Method not implemented.');
   }
 
-  public testLoadFixtureResult<FixtureType extends BaseFixture<unknown>>(
+  public testFixtureResultOf<FixtureType extends BaseFixture<unknown>>(
     type: Type<FixtureType>
   ): UnPromisify<ReturnType<FixtureType['install']>> {
-    return this.loadFixtureResult(type);
+    return this.fixtureResultOf(type);
   }
 
   public testFactoryOf<EntityType>(type: Type<EntityType>): BaseFactory<EntityType> {
@@ -42,29 +42,29 @@ describe('BaseFixture', () => {
   it('getFixtureName', () => {
     const mockedBridge = {
       getFactoryInstance: jest.fn(),
-      getFixtureResult: jest.fn(),
+      fixtureResultOf: jest.fn(),
     };
     const fixture = new TestFixture(mockedBridge);
     expect(fixture.testGetFixtureName()).toEqual(TestFixture.name);
   });
-  describe('loadFixtureResult', () => {
+  describe('fixtureResultOf', () => {
     const mockedBridge = {
       getFactoryInstance: jest.fn(),
-      getFixtureResult: jest.fn((type: Type<BaseFixture<unknown>>) => {
+      fixtureResultOf: jest.fn((type: Type<BaseFixture<unknown>>) => {
         if (type.name === TestTargetFixture.name) return 'asdf';
         return undefined;
       }),
     };
     it('works', () => {
       const fixture = new TestFixture(mockedBridge as unknown as FixtureBridge);
-      expect(
-        fixture.testLoadFixtureResult(TestTargetFixture as new () => TestTargetFixture)
-      ).toEqual('asdf');
+      expect(fixture.testFixtureResultOf(TestTargetFixture as new () => TestTargetFixture)).toEqual(
+        'asdf'
+      );
     });
     it('fails if does not exist', () => {
       const fixture = new TestFixture(mockedBridge as unknown as FixtureBridge);
       expect(() =>
-        fixture.testLoadFixtureResult(TestFixture as new () => TestFixture)
+        fixture.testFixtureResultOf(TestFixture as new () => TestFixture)
       ).toThrowError();
     });
   });
@@ -78,7 +78,7 @@ describe('BaseFixture', () => {
         }
         return undefined;
       }),
-      getFixtureResult: jest.fn(),
+      fixtureResultOf: jest.fn(),
     };
     it('works', () => {
       const fixture = new TestFixture(mockedBridge as unknown as FixtureBridge);

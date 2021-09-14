@@ -8,7 +8,7 @@ export interface FixtureBridge {
     type: Type<EntityType>,
     name?: string
   ): BaseFactory<EntityType> | undefined;
-  getFixtureResult<FixtureType extends BaseFixture<unknown>>(
+  fixtureResultOf<FixtureType extends BaseFixture<unknown>>(
     type: Type<FixtureType>
   ): FixtureResult<FixtureType> | undefined;
 }

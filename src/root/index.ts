@@ -55,7 +55,7 @@ export default class FixtureRoot {
     this.fixtureResultCache = {};
   }
 
-  public getFactoryInstance<EntityType>(
+  public factoryOf<EntityType>(
     type: Type<EntityType>,
     name: string = DEFAULT_FACTORY_NAME
   ): BaseFactory<EntityType> | undefined {
@@ -66,7 +66,7 @@ export default class FixtureRoot {
     return undefined;
   }
 
-  public getFixtureResult<T extends BaseFixture<unknown>>(
+  public fixtureResultOf<T extends BaseFixture<unknown>>(
     type: Type<T>
   ): FixtureResult<T> | undefined {
     const key = Reflect.getMetadata(CLASS_IDENTIFIER, type.prototype);
@@ -81,14 +81,14 @@ export default class FixtureRoot {
 
   private instantiateFactory(buildMe: FactoryConstructor) {
     return new buildMe({
-      getFactoryInstance: (type) => this.getFactoryInstance(type),
+      getFactoryInstance: (type) => this.factoryOf(type),
     });
   }
 
   private instantiateFixture(buildMe: FixtureConstructor) {
     return new buildMe({
-      getFactoryInstance: (type) => this.getFactoryInstance(type),
-      getFixtureResult: (type) => this.getFixtureResult(type),
+      getFactoryInstance: (type) => this.factoryOf(type),
+      fixtureResultOf: (type) => this.fixtureResultOf(type),
     });
   }
 }
