@@ -19,7 +19,7 @@ export interface FixtureRootOptions {
   fixtures?: FixtureConstructor[];
 }
 
-export default class FixtureRoot {
+export default class FixtureContainer {
   constructor(private readonly options: FixtureRootOptions) {}
 
   private constructorCache?: ImportResult;
