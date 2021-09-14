@@ -9,6 +9,9 @@
   <a href="https://coveralls.io/github/jungnoh/typeorm-fixture?branch=main">
     <img src="https://coveralls.io/repos/github/jungnoh/typeorm-fixture/badge.svg?branch=main" alt="Coverage Status">
   </a>
+  <a href="https://www.npmjs.com/package/typeorm-fixture">
+    <img src="https://img.shields.io/npm/v/typeorm-fixture" alt="npm shield">
+  </a>
 </p>
 
 typeorm-fixture provides an easy and consistant way to load test fixtures into a database with TypeORM.
