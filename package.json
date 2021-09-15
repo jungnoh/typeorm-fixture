@@ -1,9 +1,9 @@
 {
   "name": "typeorm-fixture",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Painless TypeORM fixtures",
   "keywords": ["typeorm", "fixture", "test", "testing", "database"],
-  "main": "dist/index.ts",
+  "main": "dist/index.js",
   "author": "jungnoh",
   "license": "MIT",
   "scripts": {
