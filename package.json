@@ -1,6 +1,6 @@
 {
   "name": "typeorm-fixture",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Painless TypeORM fixtures",
   "keywords": ["typeorm", "fixture", "test", "testing", "database"],
   "main": "dist/index.js",
@@ -9,9 +9,9 @@
   "scripts": {
     "lint": "eslint --fix src",
     "build": "rm -rf dist && tsc",
+    "pretest": "yarn build",
     "test": "jest",
-    "test:coverage": "jest --coverage",
-    "prepublish": "yarn build"
+    "test:coverage": "jest --coverage"
   },
   "dependencies": {
     "glob": "^7.1.7",
@@ -36,5 +36,9 @@
     "ts-jest": "^27.0.5",
     "ts-node": "^10.2.1",
     "typeorm": "^0.2.37"
-  }
+  },
+  "files": [
+    "dist/**/*.d.ts",
+    "dist/**/*.js"
+  ]
 }
