@@ -10,7 +10,8 @@
     "lint": "eslint --fix src",
     "build": "rm -rf dist && tsc",
     "test": "jest",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "prepublish": "yarn build"
   },
   "dependencies": {
     "glob": "^7.1.7",
