@@ -5,6 +5,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    environment: publish
     steps:
       - name: Wait for test to succeed
         uses: fountainhead/action-wait-for-check@v1.0.0
