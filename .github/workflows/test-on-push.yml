@@ -6,7 +6,7 @@ on:
     - '**'
 
 jobs:
-  Test:
+  test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -26,11 +26,13 @@ jobs:
       run: yarn test:coverage
       env:
         POSTGRES_HOST: localhost
-    - name: Coveralls
+    - name: Coveralls Parallel
       uses: coverallsapp/github-action@master
       with:
         path-to-lcov: './coverage/lcov.info'
         github-token: ${{ secrets.GITHUB_TOKEN }}
+        flag-name: run-node-v${{ matrix.node }}
+        parallel: true
     # Service containers to run with `container-job`
     services:
       # Label used to access the service container
@@ -50,3 +52,14 @@ jobs:
           --health-retries 5
         ports:
           - 5432:5432
+  test-finish:
+    needs: test
+    runs-on: ubuntu-latest
+    name: Test Finished
+    steps:
+    - name: Coveralls Finished
+      uses: coverallsapp/github-action@master
+      with:
+        github-token: ${{ secrets.github_token }}
+        parallel-finished: true
+
