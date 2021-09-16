@@ -20,7 +20,7 @@ This library provides three constructs:
 
 Along with these, typeorm-fixture has many features that help us spend more time on writing actual tests.
 
-## Installation
+# Installation
 With npm
 ```bash
 npm install --dev typeorm-fixture
@@ -32,8 +32,8 @@ yarn add -D typeorm-fixture
 [TypeORM](https://www.npmjs.com/package/typeorm) is a peer dependency.
 `experimentalDecorators` must be set to true in `tsconfig.json`, although this already should have been set if TypeORM is installed.
 
-## Features
-For demonstration, let's load some test data for this model.
+# Features
+For demonstration, let's load some test data.
 ```typescript
 // src/models.ts
 @Entity()
@@ -75,7 +75,7 @@ export class ArticleLike {
   articleId!: number;
 }
 ```
-### Factories
+## Factories
 Factories create entities with random or partially prepared data. Only the `createRandom()` abstract method need to be implemented, and the `BaseFactory` takes care of everything else. After defining `createRandom()`, factories can be used in fixtures or in test cases.
 
 Factories should not have access to the database, as its role is only to create entity instances. <br />All factories should be created by extending `BaseFactory<EntityType>`, and with the `@Factory(EntityType)` decorator.
@@ -113,8 +113,8 @@ export default class ArticleFactory extends BaseFactory<Article> {
 }
 ```
 
-### Static Fixtures
-Factories alone cannot manipulate databases. Static fixtures provide a pattern to load fixed entities and data when a test suite starts. 
+## Static Fixtures
+Factories alone cannot persist databases. Static fixtures provide a pattern to load fixed entities and data when a test suite starts. 
 
 We can start by creating and inserting 10 random users.
 ```typescript
@@ -151,7 +151,7 @@ In ArticleFixture, dependencies are provided in `@StaticFixture`. This ensures t
 
 We can also see that `this.factoryOf(Article).partial` is called. `partial` is also a method defined in `BaseFactory`, allowing us to override some properties over a random entity made in `createRandom`.
 
-### Dynamic Fixtures
+## Dynamic Fixtures
 Because static fixtures are intended to be used only before starting any test cases, they have little flexibility.
 They are only used once, so they don't accept parameters.
 We can't obtain instances of static fixtures as they aren't meant to be used multiple times.
@@ -188,7 +188,7 @@ Some things to keep in mind are:
 - Dynamic fixtures and static fixtures are both fixtures. They can both be dependent on each other, and obtain instances/results of each other.
 - If the `isolationLevel` field is provided, the whole fixture is run within a single transaction. `isolationLevel` can be one of the values in TypeORM's `IsolationLevel` type, or `default` (using the default database isolation level). This can also used in static fixtures.
 
-### Bringing everything together
+## Bringing everything together
 We haven't described how we can use the classes we've created. Everything we made can be imported and used though the `FixtureContainer`.
 
 A FixtureContainer should be kept somewhere you can always access during tests. For instance in jest, this could be a variable inside the outermost `describe` block.
@@ -221,7 +221,7 @@ After initializing the container, we can use the loaded classes/results.
 - `.fixtureResultOf(StaticFixtureType)` returns the cached result of the `StaticFixtureType` static fixture.
 - `.dynamicFixtureOf(DynamicFixtureType)` returns a dynamic fixture instance for `DynamicFixtureType`.
 
-### Reusing a single fixture container
+## Reusing a single fixture container
 If reusing (reinstalling) static fixtures is necessary, we can do so by clearing the container cache and reinstalling fixtures.
 
 ```typescript
@@ -242,5 +242,21 @@ describe('My database', () => {
 });
 ```
 
-## License
+# Advanced Features
+## Saving directly from a factory
+Factories are often used for creating and directly saving entities. As a result, we often write a pattern like this:
+```ts
+// manager is a TypeORM EntityManager instance
+const testEntity = await manager.getRepository(MyEntity).save(fixtureContainer.factoryOf(MyEntity).random());
+```
+and the line goes longer if we use `partial`, `partialMany`, etc.
+
+This pattern can be shorter by providing the EntityManager to the factory. The factory will create object(s) as the same way as usual, then save and return the object(s).
+```ts
+const testEntity = await fixtureContainer.factoryOf(MyEntity).save(manager).random();
+```
+This is equivalent to the example using `.getRepository()`.
+
+
+# License
 MIT

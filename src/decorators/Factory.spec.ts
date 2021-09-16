@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { BaseFactory } from '..';
+import BaseFactory from '../classes/BaseFactory';
 import { FactoryBridge } from '../root/bridge';
 import { CLASS_IDENTIFIER, FACTORY_MARK, FACTORY_TARGET, MARK_VALUE } from './constants';
 import Factory from './Factory';
