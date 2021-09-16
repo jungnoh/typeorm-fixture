@@ -146,25 +146,25 @@ describe('.save(EntityManager)', () => {
     await getConnection().close();
   });
   it('random', async () => {
-    const newItem = await factory.save(getManager()).random();
+    const newItem = await factory.saving(getManager()).random();
     const found = await getConnection().getRepository(TargetEntity).findOne(newItem);
     expect(found).not.toBeNull();
   });
   it('randomMany', async () => {
-    const newItems = await factory.save(getManager()).randomMany(3);
+    const newItems = await factory.saving(getManager()).randomMany(3);
     const repository = getConnection().getRepository(TargetEntity);
     const found = await Promise.all(newItems.map((newItem) => repository.findOne(newItem)));
     expect(found).not.toContain(null);
   });
   it('partial', async () => {
-    const newItem = await factory.save(getManager()).partial({ t1: 'TEST' });
+    const newItem = await factory.saving(getManager()).partial({ t1: 'TEST' });
     const found = await getConnection()
       .getRepository(TargetEntity)
       .findOne({ ...newItem, t1: 'TEST' });
     expect(found).not.toBeNull();
   });
   it('partialMany', async () => {
-    const newItems = await factory.save(getManager()).partialMany(5, { t1: 'TEST' });
+    const newItems = await factory.saving(getManager()).partialMany(5, { t1: 'TEST' });
     const repository = getConnection().getRepository(TargetEntity);
     const found = await Promise.all(
       newItems.map((newItem) => repository.findOne({ ...newItem, t1: 'TEST' }))
@@ -175,7 +175,7 @@ describe('.save(EntityManager)', () => {
     const partial = [1, 2, 3, 4, 5].map((v) => ({
       t1: v.toString(),
     }));
-    const newItems = await factory.save(getManager()).partialMap(partial);
+    const newItems = await factory.saving(getManager()).partialMap(partial);
     const repository = getConnection().getRepository(TargetEntity);
     const found = await Promise.all(newItems.map((newItem) => repository.findOne(newItem)));
     expect(found).not.toContain(null);

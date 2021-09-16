@@ -49,7 +49,7 @@ export default abstract class BaseFactory<T> implements IFactory<T> {
     return overwrites.map((ovewrite) => this.partial(ovewrite));
   }
 
-  public save(manager: EntityManager): PromisifyObject<IFactory<T>> {
+  public saving(manager: EntityManager): PromisifyObject<IFactory<T>> {
     const repository = manager.getRepository(this.getEntityType());
     return {
       random: () => repository.save(this.random()),

@@ -253,7 +253,7 @@ and the line goes longer if we use `partial`, `partialMany`, etc.
 
 This pattern can be shorter by providing the EntityManager to the factory. The factory will create object(s) as the same way as usual, then save and return the object(s).
 ```ts
-const testEntity = await fixtureContainer.factoryOf(MyEntity).save(manager).random();
+const testEntity = await fixtureContainer.factoryOf(MyEntity).saving(manager).random();
 ```
 This is equivalent to the example using `.getRepository()`.
 
