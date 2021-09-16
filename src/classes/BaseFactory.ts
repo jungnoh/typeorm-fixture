@@ -1,11 +1,20 @@
+import { EntityManager } from 'typeorm';
 import { FACTORY_TARGET } from '../decorators/constants';
 import { FactoryBridge } from '../root/bridge';
-import { PartialProperties, Properties, Type } from '../types';
+import { PartialProperties, PromisifyObject, Type } from '../types';
 
-export default abstract class BaseFactory<T> {
+interface IFactory<T> {
+  random(): T;
+  randomMany(count: number): T[];
+  partial(overwrite: PartialProperties<T>): T;
+  partialMany(count: number, overwrite: PartialProperties<T>): T[];
+  partialMap(overwrites: PartialProperties<T>[]): T[];
+}
+
+export default abstract class BaseFactory<T> implements IFactory<T> {
   constructor(private readonly bridge: FactoryBridge) {}
 
-  protected abstract createRandom(overwrite: PartialProperties<T>): T | Properties<T>;
+  protected abstract createRandom(overwrite: PartialProperties<T>): T | PartialProperties<T>;
 
   public random(): T {
     return this.instanceEnsuredCreateRandom({});
@@ -37,6 +46,19 @@ export default abstract class BaseFactory<T> {
 
   public partialMap(overwrites: PartialProperties<T>[]): T[] {
     return overwrites.map((ovewrite) => this.partial(ovewrite));
+  }
+
+  public save(manager: EntityManager): PromisifyObject<IFactory<T>> {
+    const repository = manager.getRepository(this.getEntityType());
+    return {
+      random: () => repository.save(this.random()),
+      randomMany: (count: number) => repository.save(this.randomMany(count)),
+      partial: (overwrite: PartialProperties<T>) => repository.save(this.partial(overwrite)),
+      partialMany: (count: number, overwrite: PartialProperties<T>) =>
+        repository.save(this.partialMany(count, overwrite)),
+      partialMap: (overwrites: PartialProperties<T>[]) =>
+        repository.save(this.partialMap(overwrites)),
+    };
   }
 
   protected factoryOf<EntityType>(type: Type<EntityType>, name?: string): BaseFactory<EntityType> {

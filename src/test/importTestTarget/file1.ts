@@ -1,8 +1,8 @@
 import { BaseFactory } from '../..';
+import Factory from '../../decorators/Factory';
+import { StaticFixture, DynamicFixture } from '../../decorators/Fixture';
 import BaseDynamicFixture from '../../classes/DynamicFixture';
 import BaseStaticFixture from '../../classes/StaticFixture';
-import Factory from '../../decorators/Factory';
-import { DynamicFixture, StaticFixture } from '../../decorators/Fixture';
 
 export const SOME_LITERAL = 'hi';
 export const SOME_OTHER_LITERAL = 'hi2';
