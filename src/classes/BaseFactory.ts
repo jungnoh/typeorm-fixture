@@ -35,6 +35,10 @@ export default abstract class BaseFactory<T> {
     return result;
   }
 
+  public partialMap(overwrites: PartialProperties<T>[]): T[] {
+    return overwrites.map((ovewrite) => this.partial(ovewrite));
+  }
+
   protected factoryOf<EntityType>(type: Type<EntityType>, name?: string): BaseFactory<EntityType> {
     const result = this.bridge.getFactoryInstance(type, name);
     if (!result) {

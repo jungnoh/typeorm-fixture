@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { randomUUID } from 'crypto';
 import 'reflect-metadata';
 import { BaseFactory, Factory } from '..';
 import { FactoryBridge } from '../root/bridge';
@@ -25,6 +26,16 @@ class TestFactoryOfFactory extends BaseFactory<TargetEntity> {
     return {
       ...this.factoryOf(SmallEntity).random(),
       t2: 'success',
+    };
+  }
+}
+
+@Factory(TargetEntity)
+class TestPartialMapFactory extends BaseFactory<TargetEntity> {
+  protected createRandom() {
+    return {
+      t1: randomUUID(),
+      t2: randomUUID(),
     };
   }
 }
@@ -62,6 +73,20 @@ describe('BaseFactory', () => {
     expect(randomMock).toBeCalledTimes(12);
     expect(result).toHaveLength(12);
     expect(result.every((v) => v.t2 === 'asdf')).toBe(true);
+  });
+  it('partialMap', () => {
+    const mockedBridge = {
+      getFactoryInstance: jest.fn(),
+    };
+    const factory = new TestPartialMapFactory(mockedBridge);
+    const partial = [1, 2, 3, 4, 5].map((v) => ({
+      t1: v.toString(),
+    }));
+    const result = factory.partialMap(partial);
+    expect(result).toHaveLength(5);
+    for (let i = 0; i < partial.length - 1; i += 1) {
+      expect(result[i].t2).not.toEqual(result[i + 1].t2);
+    }
   });
   describe('factoryOf', () => {
     it('works', () => {
