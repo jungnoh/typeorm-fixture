@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { randomUUID } from 'crypto';
 import 'reflect-metadata';
 import {
   Column,
@@ -47,8 +46,8 @@ class TestFactoryOfFactory extends BaseFactory<TargetEntity> {
 class TestPartialMapFactory extends BaseFactory<TargetEntity> {
   protected createRandom() {
     return {
-      t1: randomUUID(),
-      t2: randomUUID(),
+      t1: Math.random().toString(),
+      t2: Math.random().toString(),
     };
   }
 }
