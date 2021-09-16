@@ -20,3 +20,7 @@ export type PromisifyObject<Base> = {
     ? PromisifyFunction<Base[Key]>
     : never;
 };
+
+export type MapOfKey<T, U extends keyof T> = T[U] extends string | number | symbol
+  ? Record<T[U], T>
+  : never;

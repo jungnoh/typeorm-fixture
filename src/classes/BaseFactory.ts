@@ -2,6 +2,7 @@ import { EntityManager } from 'typeorm';
 import { FACTORY_TARGET } from '../decorators/constants';
 import { FactoryBridge } from '../root/bridge';
 import { PartialProperties, PromisifyObject, Type } from '../types';
+import { overwriteProperties } from '../util/object';
 
 interface IFactory<T> {
   random(): T;
@@ -76,14 +77,7 @@ export default abstract class BaseFactory<T> implements IFactory<T> {
       return result as T;
     }
     const newInstance = new entityType();
-    return this.overwriteProperties(newInstance, result);
-  }
-
-  private overwriteProperties<U>(target: U, overwrite: PartialProperties<U>): U {
-    for (const key of Object.keys(overwrite) as (keyof U)[]) {
-      target[key] = overwrite[key as keyof PartialProperties<U>] as U[typeof key];
-    }
-    return target;
+    return overwriteProperties(newInstance, result);
   }
 
   protected getEntityType(): Type<T> {
