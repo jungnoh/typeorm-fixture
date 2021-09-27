@@ -8,7 +8,7 @@ import {
   getManager,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { BaseFactory, Factory } from '..';
+import { BaseFactory, Factory, PartialProperties } from '..';
 import { FactoryBridge } from '../root/bridge';
 
 @Entity()
@@ -86,19 +86,35 @@ describe('BaseFactory', () => {
     expect(result).toHaveLength(12);
     expect(result.every((v) => v.t2 === 'asdf')).toBe(true);
   });
-  it('partialMap', () => {
-    const mockedBridge = {
-      getFactoryInstance: jest.fn(),
-    };
-    const factory = new TestPartialMapFactory(mockedBridge);
-    const partial = [1, 2, 3, 4, 5].map((v) => ({
-      t1: v.toString(),
-    }));
-    const result = factory.partialMap(partial);
-    expect(result).toHaveLength(5);
-    for (let i = 0; i < partial.length - 1; i += 1) {
-      expect(result[i].t2).not.toEqual(result[i + 1].t2);
-    }
+  describe('partialMap', () => {
+    it('works', () => {
+      const mockedBridge = {
+        getFactoryInstance: jest.fn(),
+      };
+      const factory = new TestPartialMapFactory(mockedBridge);
+      const partial = [1, 2, 3, 4, 5].map((v) => ({
+        t1: v.toString(),
+      }));
+      const result = factory.partialMap(partial);
+      expect(result).toHaveLength(5);
+      for (let i = 0; i < partial.length - 1; i += 1) {
+        expect(result[i].t2).not.toEqual(result[i + 1].t2);
+      }
+    });
+    it('uses common properties', () => {
+      const mockedBridge = {
+        getFactoryInstance: jest.fn(),
+      };
+      const factory = new TestPartialMapFactory(mockedBridge);
+      const partial: PartialProperties<TargetEntity>[] = [1, 2, 3, 4, 5].map((v) => ({
+        t1: v.toString(),
+      }));
+      partial[0].t2 = '1';
+      const result = factory.partialMap(partial, { t2: '3' });
+      expect(result).toHaveLength(5);
+      expect(result.filter((v) => v.t2 === '1')).toHaveLength(1);
+      expect(result.filter((v) => v.t2 === '3')).toHaveLength(4);
+    });
   });
   describe('factoryOf', () => {
     it('works', () => {
