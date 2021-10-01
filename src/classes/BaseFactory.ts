@@ -45,8 +45,8 @@ export default abstract class BaseFactory<T> implements IFactory<T> {
     return result;
   }
 
-  public partialMap(overwrites: PartialProperties<T>[]): T[] {
-    return overwrites.map((ovewrite) => this.partial(ovewrite));
+  public partialMap(overwrites: PartialProperties<T>[], common?: PartialProperties<T>): T[] {
+    return overwrites.map((ovewrite) => this.partial({ ...common, ...ovewrite }));
   }
 
   public saving(manager: EntityManager): PromisifyObject<IFactory<T>> {
