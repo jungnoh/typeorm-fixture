@@ -9,7 +9,7 @@ interface IFactory<T> {
   randomMany(count: number): T[];
   partial(overwrite: PartialProperties<T>): T;
   partialMany(count: number, overwrite: PartialProperties<T>): T[];
-  partialMap(overwrites: PartialProperties<T>[]): T[];
+  partialMap(overwrites: PartialProperties<T>[], common?: PartialProperties<T>): T[];
 }
 
 export default abstract class BaseFactory<T> implements IFactory<T> {
@@ -57,8 +57,8 @@ export default abstract class BaseFactory<T> implements IFactory<T> {
       partial: (overwrite: PartialProperties<T>) => repository.save(this.partial(overwrite)),
       partialMany: (count: number, overwrite: PartialProperties<T>) =>
         repository.save(this.partialMany(count, overwrite)),
-      partialMap: (overwrites: PartialProperties<T>[]) =>
-        repository.save(this.partialMap(overwrites)),
+      partialMap: (overwrites: PartialProperties<T>[], common?: PartialProperties<T>) =>
+        repository.save(this.partialMap(overwrites), common),
     };
   }
 
