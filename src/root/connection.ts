@@ -2,6 +2,7 @@ import { EntityManager, getManager } from 'typeorm';
 import { IsolationLevel } from 'typeorm/driver/types/IsolationLevel';
 import { FixtureConstructor } from '../classes/types';
 import { FIXTURE_TX_LEVEL } from '../decorators/constants';
+import { mockManager } from './mockedManager';
 
 export async function runWithScopedConnection<T>(
   fixture: FixtureConstructor,
@@ -29,4 +30,12 @@ export async function runWithScopedConnection<T>(
     result = await func(entityManager);
   });
   return result!;
+}
+
+export async function runWithNoConnection<T>(
+  fixture: FixtureConstructor,
+  func: (entityManager: EntityManager) => Promise<T>
+): Promise<T> {
+  const mockedManager = mockManager();
+  return await func(mockedManager);
 }
