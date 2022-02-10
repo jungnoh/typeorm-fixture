@@ -24,11 +24,13 @@ export async function runWithScopedConnection<T>(
     await getManager().transaction(async (entityManager) => {
       result = await func(entityManager);
     });
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return result!;
   }
   await getManager().transaction(isolationLevel, async (entityManager) => {
     result = await func(entityManager);
   });
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   return result!;
 }
 
