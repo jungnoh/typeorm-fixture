@@ -1,5 +1,4 @@
 import 'reflect-metadata';
-import { EntityManager } from 'typeorm';
 import { StaticFixture } from '../decorators/Fixture';
 import { FixtureBridge } from '../root/bridge';
 import { Type, UnPromisify } from '../types';
@@ -12,14 +11,14 @@ class TestEntity {
 
 @StaticFixture()
 class TestTargetFixture extends BaseStaticFixture<string> {
-  public async install(manager: EntityManager): Promise<string> {
+  public async install(): Promise<string> {
     return 'asdf';
   }
 }
 
 @StaticFixture()
 class TestFixture extends BaseStaticFixture<void> {
-  public install(manager: EntityManager): Promise<void> {
+  public install(): Promise<void> {
     throw new Error('Method not implemented.');
   }
 

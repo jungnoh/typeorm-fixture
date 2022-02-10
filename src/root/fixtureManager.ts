@@ -6,7 +6,7 @@ import {
 } from '../classes/types';
 import { CLASS_DEPENDENCIES } from '../decorators/constants';
 import { FixtureType, getFixtureType, getIdentifier } from '../decorators/identifiers';
-import { runWithScopedConnection } from './connection';
+import { runWithNoConnection, runWithScopedConnection } from './connection';
 import resolveLoadOrder from './dependency';
 
 export interface FixtureLoadFilters {
@@ -19,13 +19,18 @@ export interface FixtureConstructors {
   static: StaticFixtureConstructor[];
 }
 
+export interface FixtureManagerOptions {
+  mockDatabase: boolean;
+}
+
 export default class FixtureManager {
   constructor(
     private readonly constructors: FixtureConstructors,
     private readonly instantiator: (
       buildMe: FixtureConstructor
     ) => BaseDynamicFixture<unknown, unknown>,
-    private readonly onFixtureResult: (key: string, value: unknown) => void
+    private readonly onFixtureResult: (key: string, value: unknown) => void,
+    private readonly managerOptions: FixtureManagerOptions
   ) {}
 
   public async loadAll(options?: FixtureLoadFilters): Promise<void> {
@@ -54,10 +59,18 @@ export default class FixtureManager {
         continue;
       }
       const instance = this.instantiator(fixtureMap[key]);
-      const result = await runWithScopedConnection(
-        fixtureMap[key],
-        async (connection) => await instance.install(connection, undefined)
-      );
+      let result;
+      if (this.managerOptions.mockDatabase) {
+        result = await runWithNoConnection(
+          fixtureMap[key],
+          async (connection) => await instance.install(connection, undefined)
+        );
+      } else {
+        result = await runWithScopedConnection(
+          fixtureMap[key],
+          async (connection) => await instance.install(connection, undefined)
+        );
+      }
       this.onFixtureResult(key, result);
     }
   }
