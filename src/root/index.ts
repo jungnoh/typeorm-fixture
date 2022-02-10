@@ -17,6 +17,7 @@ export interface FixtureRootOptions {
   filePatterns?: string[];
   factories?: FactoryConstructor[];
   fixtures?: FixtureConstructor[];
+  mockDatabase?: boolean;
 }
 
 export default class FixtureContainer {
@@ -63,7 +64,8 @@ export default class FixtureContainer {
       (buildMe) => this.instantiateFixture(buildMe),
       (key, value) => {
         this.staticFixtureResultCache[key] = value;
-      }
+      },
+      { mockDatabase: this.options.mockDatabase ?? false }
     );
     await manager.loadAll(options);
   }
@@ -101,7 +103,8 @@ export default class FixtureContainer {
       const instance = this.instantiateFixture(this.dynamicFixtureConstructors[key]);
       return new DynamicFixtureDelegate<T, U>(
         type,
-        instance as Exclude<BaseDynamicFixture<T, U>, BaseStaticFixture<T>>
+        instance as Exclude<BaseDynamicFixture<T, U>, BaseStaticFixture<T>>,
+        { mockDatabase: this.options.mockDatabase ?? false }
       );
     }
     return undefined;

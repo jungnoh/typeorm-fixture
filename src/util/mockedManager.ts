@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   DeepPartial,
   EntityManager,
@@ -6,7 +8,7 @@ import {
   Repository,
   SaveOptions,
 } from 'typeorm';
-import { createMock, PartialFuncReturn } from '../util/mock';
+import { createMock, PartialFuncReturn } from './mock';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function mockedManagerSave<Entity>(entities: Entity[], options?: SaveOptions): Promise<Entity[]>;
@@ -108,11 +110,10 @@ function mockedManagerCreate<Entity>(
     const cls = new entityClass();
     return Object.assign(cls, v);
   });
-
   if (plainObjects instanceof Array) {
-    return converted[0];
+    return converted;
   }
-  return converted;
+  return converted[0];
 }
 
 export function mockRepository<T>(cls: ClassType<T>): Repository<T> {
