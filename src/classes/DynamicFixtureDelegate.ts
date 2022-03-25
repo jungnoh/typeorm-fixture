@@ -1,9 +1,10 @@
+import { EntityManager } from 'typeorm';
 import { runWithNoConnection, runWithScopedConnection } from '../root/connection';
 import { Type } from '../types';
 import BaseDynamicFixture from './DynamicFixture';
 
 export interface DynamicFixtureDelegateOptions {
-  mockDatabase: boolean;
+  overrideManager?: EntityManager;
 }
 
 export default class DynamicFixtureDelegate<T, U> {
@@ -14,9 +15,9 @@ export default class DynamicFixtureDelegate<T, U> {
   ) {}
 
   public async install(options: U): Promise<T> {
-    if (this.options.mockDatabase) {
+    if (this.options.overrideManager) {
       return await runWithNoConnection<T>(
-        this.type,
+        this.options.overrideManager,
         async (manager) => await this.instance.install(manager, options)
       );
     }

@@ -2,6 +2,7 @@ import { createConnection, EntityManager, getConnection } from 'typeorm';
 import { FixtureBridge } from '../root/bridge';
 import BaseDynamicFixture from './DynamicFixture';
 import DynamicFixtureDelegate from './DynamicFixtureDelegate';
+import { mockManager } from '../util/mockedManager';
 
 class TestEntity {
   public value!: number;
@@ -41,16 +42,14 @@ describe('DynamicFixtureDelegate', () => {
     it('can use manager', async () => {
       const TEST_STRING = 'TEST_STRING';
       const fixture = new TestDynamicFixture({} as unknown as FixtureBridge);
-      await new DynamicFixtureDelegate(TestDynamicFixture, fixture, {
-        mockDatabase: false,
-      }).install(TEST_STRING);
+      await new DynamicFixtureDelegate(TestDynamicFixture, fixture, {}).install(TEST_STRING);
     });
   });
   describe('without real database', () => {
     it('can use manager', async () => {
       const fixture = new TestMockingDynamicFixture({} as unknown as FixtureBridge);
       const result = await new DynamicFixtureDelegate(TestMockingDynamicFixture, fixture, {
-        mockDatabase: true,
+        overrideManager: mockManager(),
       }).install({});
 
       expect(result).toHaveLength(2);

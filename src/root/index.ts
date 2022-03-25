@@ -114,7 +114,7 @@ export default class FixtureContainer {
       return new DynamicFixtureDelegate<T, U>(
         type,
         instance as Exclude<BaseDynamicFixture<T, U>, BaseStaticFixture<T>>,
-        { mockDatabase: this.options.mockDatabase ?? false }
+        { overrideManager: this.options.mockDatabase ? this.manager.manager : undefined }
       );
     }
     return undefined;
