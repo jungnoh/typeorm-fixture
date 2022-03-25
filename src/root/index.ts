@@ -1,3 +1,4 @@
+import { EntityManager } from 'typeorm';
 import BaseFactory from '../classes/BaseFactory';
 import BaseDynamicFixture from '../classes/DynamicFixture';
 import DynamicFixtureDelegate from '../classes/DynamicFixtureDelegate';
@@ -27,6 +28,14 @@ export default class FixtureContainer {
   private factoryInstanceCache: Record<string, BaseFactory<unknown>> = {};
   private staticFixtureResultCache: Record<string, unknown> = {};
   private dynamicFixtureConstructors: Record<string, DynamicFixtureConstructor> = {};
+  private manager!: FixtureManager;
+
+  public get usedTypeOrmManager(): EntityManager {
+    if (!this.manager) {
+      throw new Error('Fixtures have not been set up. Please call .loadFiles() first');
+    }
+    return this.manager.manager;
+  }
 
   public async loadFiles(): Promise<void> {
     if (this.constructorCache) {
@@ -50,13 +59,8 @@ export default class FixtureContainer {
       const targetName = getIdentifier(dynamicFixture);
       this.dynamicFixtureConstructors[targetName] = dynamicFixture;
     }
-  }
 
-  public async installFixtures(options?: FixtureLoadFilters): Promise<void> {
-    if (!this.constructorCache) {
-      throw new Error('Fixture files have not been imported yet');
-    }
-    const manager = new FixtureManager(
+    this.manager = new FixtureManager(
       {
         dynamic: this.constructorCache.dynamicFixtures,
         static: this.constructorCache.staticFixtures,
@@ -67,7 +71,13 @@ export default class FixtureContainer {
       },
       { mockDatabase: this.options.mockDatabase ?? false }
     );
-    await manager.loadAll(options);
+  }
+
+  public async installFixtures(options?: FixtureLoadFilters): Promise<void> {
+    if (!this.constructorCache) {
+      throw new Error('Fixture files have not been imported yet');
+    }
+    await this.manager.loadAll(options);
   }
 
   public clearFixtureResult(): void {

@@ -1,3 +1,4 @@
+import { EntityManager, getManager } from 'typeorm';
 import BaseDynamicFixture from '../classes/DynamicFixture';
 import {
   DynamicFixtureConstructor,
@@ -6,6 +7,7 @@ import {
 } from '../classes/types';
 import { CLASS_DEPENDENCIES } from '../decorators/constants';
 import { FixtureType, getFixtureType, getIdentifier } from '../decorators/identifiers';
+import { mockManager } from '../util/mockedManager';
 import { runWithNoConnection, runWithScopedConnection } from './connection';
 import resolveLoadOrder from './dependency';
 
@@ -24,6 +26,12 @@ export interface FixtureManagerOptions {
 }
 
 export default class FixtureManager {
+  private mockedManager = mockManager();
+
+  public get manager(): EntityManager {
+    return this.managerOptions.mockDatabase ? this.mockedManager : getManager();
+  }
+
   constructor(
     private readonly constructors: FixtureConstructors,
     private readonly instantiator: (
@@ -62,7 +70,7 @@ export default class FixtureManager {
       let result;
       if (this.managerOptions.mockDatabase) {
         result = await runWithNoConnection(
-          fixtureMap[key],
+          this.mockedManager,
           async (connection) => await instance.install(connection, undefined)
         );
       } else {
