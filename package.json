@@ -2,7 +2,13 @@
   "name": "typeorm-fixture",
   "version": "0.3.4",
   "description": "Painless TypeORM fixtures",
-  "keywords": ["typeorm", "fixture", "test", "testing", "database"],
+  "keywords": [
+    "typeorm",
+    "fixture",
+    "test",
+    "testing",
+    "database"
+  ],
   "main": "dist/index.js",
   "author": "jungnoh",
   "license": "MIT",
@@ -31,6 +37,7 @@
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-prettier": "^4.0.0",
     "jest": "^27.1.1",
+    "jest-extended": "^2.0.0",
     "pg": "^8.7.1",
     "prettier": "^2.4.0",
     "ts-jest": "^27.0.5",
