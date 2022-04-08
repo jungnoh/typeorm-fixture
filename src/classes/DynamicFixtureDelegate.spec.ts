@@ -1,8 +1,9 @@
 import { createConnection, EntityManager, getConnection } from 'typeorm';
+import { MockedEntityManager } from '../mock/EntityManager';
 import { FixtureBridge } from '../root/bridge';
+import { createMock, PartialFuncReturn } from '../util/mock';
 import BaseDynamicFixture from './DynamicFixture';
 import DynamicFixtureDelegate from './DynamicFixtureDelegate';
-import { mockManager } from '../util/mockedManager';
 
 class TestEntity {
   public value!: number;
@@ -49,11 +50,13 @@ describe('DynamicFixtureDelegate', () => {
     it('can use manager', async () => {
       const fixture = new TestMockingDynamicFixture({} as unknown as FixtureBridge);
       const result = await new DynamicFixtureDelegate(TestMockingDynamicFixture, fixture, {
-        overrideManager: mockManager(),
+        overrideManager: createMock(
+          new MockedEntityManager() as unknown as PartialFuncReturn<EntityManager>
+        ),
       }).install({});
 
       expect(result).toHaveLength(2);
-      expect(result[0]).toBeInstanceOf(TestEntity);
+      expect(result[0]).toMatchObject({ value: 1 });
       expect(result[0].value).toBe(1);
     });
   });
