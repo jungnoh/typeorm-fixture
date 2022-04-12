@@ -7,7 +7,8 @@ import {
 } from '../classes/types';
 import { CLASS_DEPENDENCIES } from '../decorators/constants';
 import { FixtureType, getFixtureType, getIdentifier } from '../decorators/identifiers';
-import { mockManager } from '../util/mockedManager';
+import { MockedEntityManager } from '../mock/EntityManager';
+import { createMock, PartialFuncReturn } from '../util/mock';
 import { runWithNoConnection, runWithScopedConnection } from './connection';
 import resolveLoadOrder from './dependency';
 
@@ -26,7 +27,9 @@ export interface FixtureManagerOptions {
 }
 
 export default class FixtureManager {
-  private mockedManager = mockManager();
+  private mockedManager = createMock<EntityManager>(
+    new MockedEntityManager() as unknown as PartialFuncReturn<EntityManager>
+  );
 
   public get manager(): EntityManager {
     return this.managerOptions.mockDatabase ? this.mockedManager : getManager();

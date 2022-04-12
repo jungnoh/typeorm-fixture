@@ -100,5 +100,6 @@
   "exclude": [
     "**/*.spec.ts",
     "src/test/importTestTarget/**/*"
-  ]
+  ],
+  "files": ["src/global.d.ts"]
 }

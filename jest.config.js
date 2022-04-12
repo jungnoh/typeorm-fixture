@@ -6,4 +6,5 @@ module.exports = {
   testMatch: ['<rootDir>/src/**/*.spec.ts'],
   collectCoverageFrom: ['<rootDir>/src/**/*.ts'],
   coveragePathIgnorePatterns: ['<rootDir>/src/test/importTestTarget/*', '<rootDir>/src/index.ts'],
+  setupFilesAfterEnv: ['jest-extended/all'],
 };
